@@ -16,7 +16,9 @@ Mujur Reborn
 <hr>
 
 ## Deskripsi Aplikasi:
-Aplikasi kelompok kita adalah Mujur Reborn. Mujur Reborn berfungsi sebagai toko daring bagi orang yang ingin mencari dasi atau jepitan dasi dengan mudah dan harga yang terjangkau.
+Selamat datang di Mujur Reborn, solusi modern untuk memenuhi kebutuhan gaya profesional Anda. Sebagai aplikasi mobile yang dirancang khusus, Mujur Reborn memungkinkan Anda menjelajahi berbagai koleksi dasi dan aksesori seperti jepitan dasi dengan mudah, di mana saja dan kapan saja.
+
+Didesain dengan antarmuka yang ramah pengguna, Mujur Reborn menawarkan pengalaman berbelanja yang cepat dan praktis. Pilihan dasi kami mencakup berbagai warna, model, dan harga, sehingga Anda dapat menemukan aksesori yang sempurna untuk melengkapi penampilan Anda. Apakah Anda mempersiapkan diri untuk hari pertama bekerja, menghadiri rapat penting, atau menghadiri acara formal, Mujur Reborn memastikan Anda tampil percaya diri dan profesional.
 <hr>
 
 ## Daftar Modul:
