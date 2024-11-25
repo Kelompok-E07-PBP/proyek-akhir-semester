@@ -48,10 +48,21 @@ Didesain dengan antarmuka yang ramah pengguna, Mujur Reborn menawarkan pengalama
 <hr>
 
 ## Alur Pengintegrasian:
-1. Kita akan membuat aplikasi mobile terlebih dahulu (tanpa bagian integrasi).
-2. Kita akan menambahkan module pada aplikasi web supaya bisa lakukan integrasi dengan aplikasi mobile.
-3. Kita akan menghubungkan aplikasi mobile ke data di aplikasi web.
-4. Kita akan menyempurnakan bagian routing aplikasi.
-5. Kita akan memeriksa alur kerja masing-masing modul.
-6. Kita akan melakukan deployment aplikasi pada App Center.
+1. Membangun Aplikasi Mobile
+Langkah pertama adalah membuat aplikasi mobile dengan fitur-fitur dasar, tanpa melibatkan integrasi dengan aplikasi web. Fokus awal ini hanya pada tampilan dan fungsionalitas aplikasi, seperti navigasi antarhalaman, input data, dan elemen-elemen interaktif lainnya. Tujuannya adalah memastikan aplikasi mobile siap digunakan sebelum dihubungkan dengan sistem backend.
+
+2. Menambahkan Modul API di Aplikasi Web
+Setelah aplikasi mobile siap, kita akan menambahkan API di aplikasi web agar aplikasi mobile bisa terhubung. API ini akan dikembangkan menggunakan Django REST Framework (DRF) atau teknologi serupa untuk menyediakan data yang bisa diakses oleh aplikasi mobile, seperti daftar produk, detail pengguna, atau lainnya. API harus aman dan sesuai dengan kebutuhan aplikasi mobile.
+
+3. Menghubungkan Aplikasi Mobile ke Backend
+Setelah API selesai, aplikasi mobile akan dihubungkan ke aplikasi web. Ini dilakukan dengan menambahkan fitur pengiriman request HTTP (GET, POST, PUT, DELETE) dari aplikasi mobile ke server web. Dengan cara ini, aplikasi mobile bisa mengambil data dari server atau mengirimkan data yang diinput oleh pengguna.
+
+4. Menyempurnakan Routing Aplikasi
+Selanjutnya, kita akan menyempurnakan routing, baik di aplikasi mobile maupun web. Di aplikasi web, endpoint API akan dipastikan berjalan dengan benar. Di aplikasi mobile, navigasi akan diperbaiki agar lebih intuitif, terutama untuk menampilkan data yang diterima dari server.
+
+5. Menguji Alur Kerja
+Setiap bagian aplikasi akan diuji untuk memastikan semua fungsi berjalan lancar. Pengujian ini mencakup koneksi antara aplikasi mobile dan server web, pengolahan data yang benar, dan penanganan error seperti koneksi gagal atau data tidak valid. Semua proses akan diperiksa secara menyeluruh untuk memastikan aplikasi siap digunakan.
+
+6. Deployment Aplikasi
+Setelah semua diuji dan bekerja dengan baik, aplikasi mobile akan dideploy ke App Center untuk didistribusikan ke pengguna beta atau tim penguji. Di sisi lain, aplikasi web akan dideploy ke platform hosting seperti AWS, Vercel, atau Heroku, sehingga dapat diakses secara real-time oleh aplikasi mobile.
 <hr>
