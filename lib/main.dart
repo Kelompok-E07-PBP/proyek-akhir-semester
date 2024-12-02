@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mujur_reborn/menu.dart';
+import 'package:mujur_reborn/widgets/bottom_navbar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -8,18 +8,17 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Mujur Reborn',
       theme: ThemeData(
-      colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.deepPurple,
-      ).copyWith(secondary: Colors.deepPurple[400]),
-      useMaterial3: true,
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: Colors.lightBlue,
+        ).copyWith(secondary: Colors.lightBlue[400]),
+        useMaterial3: true,
       ),
-      home: const MyHomePage(),
+      home: const BottomNavbar(), // Use BottomNavbar as the main widget
     );
   }
 }
