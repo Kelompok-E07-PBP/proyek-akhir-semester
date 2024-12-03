@@ -5,7 +5,6 @@ import 'package:mujur_reborn/pages/payment.dart';
 import 'package:mujur_reborn/pages/shipping.dart';
 import 'package:mujur_reborn/pages/review.dart';
 
-
 class BottomNavbar extends StatefulWidget {
   const BottomNavbar({super.key});
 
@@ -16,27 +15,35 @@ class BottomNavbar extends StatefulWidget {
 class _BottomNavbarState extends State<BottomNavbar> {
   int _currentIndex = 0;
 
-  
   final List<Widget> _pages = [
-    const HomePage(),        
-    const CartPage(),        
-    const ShippingPage(),    
-    const PaymentPage(),     
-    const ReviewPage(),      
+    const HomePage(),
+    const CartPage(),
+    const ShippingPage(),
+    const PaymentPage(),
+    const ReviewPage(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mujur Reborn'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/logo.png', 
+              height: 40, 
+            ),
+          ],
+        ),
       ),
-      body: _pages[_currentIndex], 
+      body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (int newIndex) {
           setState(() {
-            _currentIndex = newIndex; 
+            _currentIndex = newIndex;
           });
         },
         items: const [
@@ -61,14 +68,13 @@ class _BottomNavbarState extends State<BottomNavbar> {
             icon: Icon(Icons.rate_review_outlined),
           ),
         ],
-        selectedItemColor: Theme.of(context).colorScheme.primary, 
+        selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Colors.black,
         backgroundColor: Colors.white,
-        showSelectedLabels: false, 
-        showUnselectedLabels: false, 
-        type: BottomNavigationBarType.fixed
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        type: BottomNavigationBarType.fixed,
       ),
     );
   }
 }
-
