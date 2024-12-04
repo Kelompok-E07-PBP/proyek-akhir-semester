@@ -23,6 +23,11 @@ class _BottomNavbarState extends State<BottomNavbar> {
     const ReviewPage(),
   ];
 
+  void _logout() {
+    // Add your logout functionality here
+    print("Logout button pressed");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,6 +35,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
         backgroundColor: Colors.white,
         elevation: 0,
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Image.asset(
               'assets/images/logo.png', 
@@ -37,6 +43,16 @@ class _BottomNavbarState extends State<BottomNavbar> {
             ),
           ],
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0), // Add right margin
+            child: IconButton(
+              icon: Icon(Icons.logout),
+              onPressed: _logout,
+              color: Colors.black,
+            ),
+          ),
+        ],
       ),
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mujur_reborn/widgets/filter_button';
+import 'package:mujur_reborn/widgets/filter_button.dart';
 import 'package:mujur_reborn/widgets/product_card.dart';
-import 'package:mujur_reborn/widgets/sliding_banner'; 
+import 'package:mujur_reborn/widgets/sliding_banner.dart'; 
 
 class HomePage extends StatelessWidget {
   HomePage({super.key});
