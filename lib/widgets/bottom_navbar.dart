@@ -47,7 +47,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
           Padding(
             padding: const EdgeInsets.only(right: 16.0), // Add right margin
             child: IconButton(
-              icon: Icon(Icons.logout),
+              icon: const Icon(Icons.logout),
               onPressed: _logout,
               color: Colors.black,
             ),
@@ -65,7 +65,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
         items: const [
           BottomNavigationBarItem(
             label: "",
-            icon: Icon(Icons.home_outlined),
+            icon: Icon(Icons.add),
           ),
           BottomNavigationBarItem(
             label: "",
