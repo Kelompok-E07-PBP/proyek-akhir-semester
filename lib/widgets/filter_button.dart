@@ -23,11 +23,11 @@ class FilterButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(30), 
           ),
           side: BorderSide(color: Colors.grey.shade300), 
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10), 
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), 
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 14,
           ),
