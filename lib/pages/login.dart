@@ -3,6 +3,7 @@ import 'package:mujur_reborn/widgets/bottom_navbar.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:mujur_reborn/pages/register.dart';
+import 'package:mujur_reborn/admin_widgets/bottom_navbar_admin.dart';
 
 void main() {
   runApp(const LoginApp());
@@ -112,8 +113,25 @@ class _LoginPageState extends State<LoginPage> {
                       if (request.loggedIn) {
                         String message = response['message'];
                         String uname = response['username'];
+                        bool isAdmin = response['isAdmin'];
+
+                        // Bagian ini akan melakukan routing user ke halaman tertentu sesuai peran.
                         if (context.mounted) {
-                          Navigator.pushReplacement(
+                          if(isAdmin){
+                            Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const BottomNavbarAdmin()),
+                            );
+                            ScaffoldMessenger.of(context)
+                            ..hideCurrentSnackBar()
+                            ..showSnackBar(
+                              SnackBar(
+                                  content:
+                                      Text("$message Selamat datang, $uname.")),
+                            );
+                          } else{
+                            Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => const BottomNavbar()),
@@ -125,6 +143,7 @@ class _LoginPageState extends State<LoginPage> {
                                   content:
                                       Text("$message Selamat datang, $uname.")),
                             );
+                          }
                         }
                       } else {
                         if (context.mounted) {

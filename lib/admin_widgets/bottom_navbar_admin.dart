@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mujur_reborn/pages/home_admin.dart';
+import 'package:mujur_reborn/pages/login.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 
 class BottomNavbarAdmin extends StatefulWidget {
   const BottomNavbarAdmin({super.key});
@@ -14,8 +17,38 @@ class _BottomNavbarAdminState extends State<BottomNavbarAdmin> {
     print("Add product button pressed");
   }
 
+  Future<void> _logout(CookieRequest request) async {
+    final response = await request.logout(
+        // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
+        "http://localhost:8000/auth/logout/");
+    String message = response["message"];
+    if (context.mounted) {
+      if (response['status']) {
+          String uname = response["username"];
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text("$message Sampai jumpa, $uname."),
+          ));
+          Navigator.pushReplacement(
+              // ignore: use_build_context_synchronously
+              context,
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+      } 
+      else {
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(message),
+              ),
+          );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
     return Scaffold(
       // Top AppBar
       appBar: AppBar(
@@ -31,10 +64,7 @@ class _BottomNavbarAdminState extends State<BottomNavbarAdmin> {
             padding: const EdgeInsets.only(right: 16.0),
             child: IconButton(
               icon: const Icon(Icons.logout),
-              onPressed: () {
-                // Admin logout functionality
-                print("logout");
-              },
+              onPressed: (){_logout(request);},
               color: Colors.black,
             ),
           ),

@@ -26,38 +26,38 @@ class _BottomNavbarState extends State<BottomNavbar> {
     const ReviewPage(),
   ];
 
-  Future<void> _logout() async {
-    final request = context.watch<CookieRequest>();
+  Future<void> _logout(CookieRequest request) async {
     final response = await request.logout(
         // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
         "http://localhost:8000/auth/logout/");
     String message = response["message"];
     if (context.mounted) {
-        if (response['status']) {
-            String uname = response["username"];
-            // ignore: use_build_context_synchronously
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text("$message Sampai jumpa, $uname."),
-            ));
-            Navigator.pushReplacement(
-                // ignore: use_build_context_synchronously
-                context,
-                MaterialPageRoute(builder: (context) => const LoginPage()),
-            );
-        } 
-        else {
-            // ignore: use_build_context_synchronously
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text(message),
-                ),
-            );
-        }
+      if (response['status']) {
+          String uname = response["username"];
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text("$message Sampai jumpa, $uname."),
+          ));
+          Navigator.pushReplacement(
+              // ignore: use_build_context_synchronously
+              context,
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+      } 
+      else {
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(message),
+              ),
+          );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -76,7 +76,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
             padding: const EdgeInsets.only(right: 16.0), // Add right margin
             child: IconButton(
               icon: const Icon(Icons.logout),
-              onPressed: _logout,
+              onPressed: (){_logout(request);},
               color: Colors.black,
             ),
           ),
