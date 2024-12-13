@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 
 class ReviewPage extends StatelessWidget {
   final List<Map<String, dynamic>> reviews;
-  
-  const ReviewPage({required this.reviews, Key? key});
+
+   const ReviewPage({Key? key, required this.reviews});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Daftar Ulasan'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: (reviews.isNotEmpty && _isValidReviewList(reviews))
           ? ListView.builder(
