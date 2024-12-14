@@ -82,7 +82,7 @@ class _ProductCardState extends State<ProductCard> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Text(
-              '\Rp ${widget.price.toStringAsFixed(3)}',
+              'Rp ${widget.price.toStringAsFixed(3)}',
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
