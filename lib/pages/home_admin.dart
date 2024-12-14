@@ -1,34 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:mujur_reborn/admin_widgets/product_card_admin.dart';
+import 'package:mujur_reborn/models/product.dart';
+import 'package:mujur_reborn/widgets/filter_button.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 
-class HomeAdminPage extends StatelessWidget {
-  HomeAdminPage({super.key});
+class HomeAdminPage extends StatefulWidget {
+  const HomeAdminPage({super.key});
 
-  final List<Map<String, dynamic>> products = [
-    {
-      'image': 'assets/images/banner1.png',
-      'name': 'Product 1',
-      'price': 72.000,
-    },
-    {
-      'image': 'assets/images/banner1.png',
-      'name': 'Product 2',
-      'price': 30.000,
-    },
-    {
-      'image': 'assets/images/banner1.png',
-      'name': 'Product 3',
-      'price': 30.000,
-    },
-    {
-      'image': 'assets/images/banner1.png',
-      'name': 'Product 4',
-      'price': 200.000,
-    },
-  ];
+  @override
+  State<HomeAdminPage> createState() => _HomeAdminPageState();
+}
+
+class _HomeAdminPageState extends State<HomeAdminPage>{
+  Future<List<Product>> fetchProduct(CookieRequest request) async {
+    // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
+    final response = await request.get('http://localhost:8000/json/');
+    
+    // Melakukan decode response menjadi bentuk json
+    var data = response;
+    
+    // Melakukan konversi data json menjadi object Product
+    List<Product> listProduct = [];
+    for (var d in data) {
+      if (d != null) {
+        listProduct.add(Product.fromJson(d));
+      }
+    }
+    return listProduct;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,32 +49,87 @@ class HomeAdminPage extends StatelessWidget {
             ),
           ),
 
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(8.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, 
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 8.0,
-                childAspectRatio: 0.75, 
+          //TODO: Implement filtering logic!
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  FilterButton(
+                    label: 'Semua',
+                    onPressed: () {},
+                  ),
+                  FilterButton(
+                    label: 'Dasi Instan',
+                    onPressed: () {},
+                  ),
+                  FilterButton(
+                    label: 'Dasi Manual',
+                    onPressed: () {},
+                  ),
+                  FilterButton(
+                    label: 'Dasi Kupu-kupu',
+                    onPressed: () {},
+                  ),
+                  FilterButton(
+                    label: 'Jepitan Dasi',
+                    onPressed: () {},
+                  ),
+                ],
               ),
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                return ProductCardAdmin(
-                  imageUrl: products[index]['image'],
-                  productName: products[index]['name'],
-                  price: products[index]['price'],
-                  onEdit: () {
-                    // Add your edit functionality here
-                    print('Edit product: ${products[index]['name']}');
-                  },
-                  onDelete: () {
-                    // Add your delete functionality here
-                    print('Delete product: ${products[index]['name']}');
-                  },
-                );
-              },
             ),
+          ),
+          
+          FutureBuilder(
+            future: fetchProduct(request),
+            builder: (context, AsyncSnapshot snapshot) {
+            if (snapshot.data == null) {
+              return const Center(child: CircularProgressIndicator());
+            } else {
+                if (!snapshot.hasData) {
+                  return const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Belum ada data produk pada Mujur Reborn.',
+                        style: TextStyle(fontSize: 20, color: Color(0xFF00ACED)),
+                      ),
+                      SizedBox(height: 8),
+                    ],
+                  );
+                } else {
+                  return Expanded(
+                    child: GridView.builder(
+                      padding: const EdgeInsets.all(8.0),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2, 
+                        crossAxisSpacing: 8.0,
+                        mainAxisSpacing: 8.0,
+                        childAspectRatio: 0.75, 
+                      ),
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (_ , index) {
+                        return ProductCardAdmin(
+                          imageUrl: snapshot.data![index].fields.gambarProduk,
+                          productName: snapshot.data![index].fields.namaProduk,
+                          category: snapshot.data![index].fields.kategori,
+                          price: double.parse(snapshot.data![index].fields.harga),
+                          onEdit: () {
+                            // Add your edit functionality here
+                            print('Edit product: ${snapshot.data![index].fields.namaProduk}');
+                          },
+                          onDelete: () {
+                            // Add your delete functionality here
+                            print('Delete product: ${snapshot.data![index].fields.namaProduk}');
+                          },
+                        );
+                      },
+                    ),
+                  );
+                }
+              }
+            }
           ),
         ],
       ),

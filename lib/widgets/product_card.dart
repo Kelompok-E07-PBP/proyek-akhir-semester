@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class ProductCard extends StatefulWidget {
   final String imageUrl;
   final String productName;
+  final String category;
   final double price;
 
   const ProductCard({
     required this.imageUrl,
     required this.productName,
+    required this.category,
     required this.price,
     super.key,
   });
@@ -44,11 +46,10 @@ class _ProductCardState extends State<ProductCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          
           Expanded(
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-              child: Image.asset(
+              child: Image.network(
                 widget.imageUrl,
                 fit: BoxFit.cover,
                 width: double.infinity,
@@ -67,6 +68,17 @@ class _ProductCardState extends State<ProductCard> {
             ),
           ),
           
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              widget.category,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Text(
