@@ -56,6 +56,7 @@ class _BottomNavbarAdminState extends State<BottomNavbarAdmin> {
     return Scaffold(
       // Top AppBar
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 2,
         titleSpacing: 20,

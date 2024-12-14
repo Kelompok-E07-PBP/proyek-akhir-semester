@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:mujur_reborn/admin_widgets/bottom_navbar_admin.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 
 class ProductEntryFormPage extends StatefulWidget {
   const ProductEntryFormPage({super.key});
@@ -10,7 +14,7 @@ class ProductEntryFormPage extends StatefulWidget {
 class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
   final _formKey = GlobalKey<FormState>();
   String _namaProduk = "";
-  String? _kategori = "";
+  String _kategori = "";
   int _harga = 0;
   String _gambarProduk = "";
   final List<Map<String, String>> _kategoriProduk = [
@@ -23,11 +27,12 @@ class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
   @override
   void initState() {
     super.initState();
-    _kategori = _kategoriProduk[0]['value']; // Opsi default
+    _kategori = _kategoriProduk[0]['value']!; // Opsi default
   }
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
     return Scaffold(
       appBar: AppBar(
         title: const Center(
@@ -87,7 +92,7 @@ class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
                   }).toList(),
                   onChanged: (String? newValue) {
                     setState(() {
-                      _kategori = newValue; 
+                      _kategori = newValue!; 
                     });
                   },
                   validator: (value) {
@@ -170,36 +175,37 @@ class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
                       backgroundColor: WidgetStateProperty.all(
                           Theme.of(context).colorScheme.primary),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text('Produk berhasil tersimpan'),
-                              content: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Nama Produk: $_namaProduk'),
-                                    Text('Kategori: $_kategori'),
-                                    Text('Harga: $_harga'),
-                                    Text('Link: $_gambarProduk')
-                                  ],
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: const Text('OK'),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    _formKey.currentState!.reset();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
+                        // Kirim ke Django dan tunggu respons
+                        // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
+                        final response = await request.postJson(
+                            "http://localhost:8000/edit/create-product-flutter/",
+                            jsonEncode(<String, String>{
+                                'nama_produk': _namaProduk,
+                                'kategori': _kategori,
+                                'harga': _harga.toString(),
+                                'gambar_produk': _gambarProduk
+                            }),
                         );
+                        if (context.mounted) {
+                          if (response['status'] == 'success') {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(const SnackBar(
+                            content: Text("Produk baru berhasil disimpan!"),
+                            ));
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => const BottomNavbarAdmin()),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(const SnackBar(
+                                content:
+                                    Text("Terdapat kesalahan, silakan coba lagi."),
+                            ));
+                          }
+                        }
                       }
                     },
                     child: const Text(

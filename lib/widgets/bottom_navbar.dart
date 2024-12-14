@@ -23,7 +23,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
     const CartPage(),
     const ShippingPage(),
     const PaymentPage(),
-    // const ReviewPage(), TODO: Perbaiki ini!
+    const ReviewPage(reviews: []), //TODO: Fix this!
   ];
 
   Future<void> _logout(CookieRequest request) async {

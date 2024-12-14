@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ReviewPage extends StatelessWidget {
   final List<Map<String, dynamic>> reviews;
 
-   const ReviewPage({Key? key, required this.reviews});
+  const ReviewPage({super.key, required this.reviews});
 
   @override
   Widget build(BuildContext context) {
