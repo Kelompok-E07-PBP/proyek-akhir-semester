@@ -19,11 +19,11 @@ class _BottomNavbarState extends State<BottomNavbar> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    HomePage(),
+    const HomePage(),
     const CartPage(),
     const ShippingPage(),
     const PaymentPage(),
-    const ReviewPage(),
+    // const ReviewPage(), TODO: Perbaiki ini!
   ];
 
   Future<void> _logout(CookieRequest request) async {

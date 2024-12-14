@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class ProductCardAdmin extends StatelessWidget {
   final String imageUrl;
   final String productName;
+  final String category;
   final double price;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
@@ -10,6 +11,7 @@ class ProductCardAdmin extends StatelessWidget {
   const ProductCardAdmin({
     required this.imageUrl,
     required this.productName,
+    required this.category,
     required this.price,
     required this.onEdit,
     required this.onDelete,
@@ -30,13 +32,14 @@ class ProductCardAdmin extends StatelessWidget {
           Expanded(
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-              child: Image.asset(
-                imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-              ),
+              child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                ),
             ),
           ),
+          
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
@@ -47,6 +50,18 @@ class ProductCardAdmin extends StatelessWidget {
               ),
             ),
           ),
+
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              category,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Text(

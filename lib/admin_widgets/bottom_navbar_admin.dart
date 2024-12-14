@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mujur_reborn/pages/home_admin.dart';
 import 'package:mujur_reborn/pages/login.dart';
+import 'package:mujur_reborn/pages/productentry_form.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 
@@ -14,7 +15,10 @@ class BottomNavbarAdmin extends StatefulWidget {
 class _BottomNavbarAdminState extends State<BottomNavbarAdmin> {
   void _addProduct() {
     // Add your add product functionality here
-    print("Add product button pressed");
+    Navigator.push(
+      context, 
+      MaterialPageRoute(builder: (context) => const ProductEntryFormPage()),
+    );
   }
 
   Future<void> _logout(CookieRequest request) async {
@@ -76,7 +80,7 @@ class _BottomNavbarAdminState extends State<BottomNavbarAdmin> {
 
       // Floating Action Button at bottom-right
       floatingActionButton: FloatingActionButton(
-        onPressed: _addProduct,
+        onPressed: (){_addProduct();},
         child: const Icon(Icons.add),
       ),
     );
