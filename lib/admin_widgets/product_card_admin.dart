@@ -65,7 +65,7 @@ class ProductCardAdmin extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Text(
-              '\Rp ${price.toStringAsFixed(3)}',
+              'Rp ${price.toStringAsFixed(3)}',
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
