@@ -13,6 +13,8 @@ class HomeAdminPage extends StatefulWidget {
 }
 
 class _HomeAdminPageState extends State<HomeAdminPage>{
+  List<Product> allProducts = [];
+  List<Product> filteredProducts = [];
   Future<List<Product>> fetchProduct(CookieRequest request) async {
     // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
     final response = await request.get('http://localhost:8000/json/');
@@ -28,6 +30,15 @@ class _HomeAdminPageState extends State<HomeAdminPage>{
       }
     }
     return listProduct;
+  }
+
+  //Fungsi ini akan memilih produk yang esuai dengan kategori tertentu.
+  void filterByCategory(String category) {
+    setState(() {
+      filteredProducts = allProducts
+          .where((product) => product.fields.kategori == category)
+          .toList();
+    });
   }
 
   @override
@@ -49,7 +60,6 @@ class _HomeAdminPageState extends State<HomeAdminPage>{
             ),
           ),
 
-          //TODO: Implement filtering logic!
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: SingleChildScrollView(
@@ -58,23 +68,35 @@ class _HomeAdminPageState extends State<HomeAdminPage>{
                 children: [
                   FilterButton(
                     label: 'Semua',
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        filteredProducts = allProducts;
+                      });
+                    },
                   ),
                   FilterButton(
-                    label: 'Dasi Instan',
-                    onPressed: () {},
+                    label: 'Dasi Instant',
+                    onPressed: () {
+                      filterByCategory('Dasi Instant');
+                    },
                   ),
                   FilterButton(
                     label: 'Dasi Manual',
-                    onPressed: () {},
+                    onPressed: () {
+                      filterByCategory('Dasi Manual');
+                    },
                   ),
                   FilterButton(
                     label: 'Dasi Kupu-kupu',
-                    onPressed: () {},
+                    onPressed: () {
+                      filterByCategory('Dasi Kupu-Kupu');
+                    },
                   ),
                   FilterButton(
                     label: 'Jepitan Dasi',
-                    onPressed: () {},
+                    onPressed: () {
+                      filterByCategory('Jepitan Dasi');
+                    },
                   ),
                 ],
               ),
@@ -99,6 +121,13 @@ class _HomeAdminPageState extends State<HomeAdminPage>{
                     ],
                   );
                 } else {
+
+                  //Atur nilai default untuk allProducts dan filteredProducts.
+                  allProducts = snapshot.data;
+                  if (filteredProducts.isEmpty) {
+                    filteredProducts = allProducts;
+                  }
+
                   return Expanded(
                     child: GridView.builder(
                       padding: const EdgeInsets.all(8.0),
@@ -108,20 +137,22 @@ class _HomeAdminPageState extends State<HomeAdminPage>{
                         mainAxisSpacing: 8.0,
                         childAspectRatio: 0.75, 
                       ),
-                      itemCount: snapshot.data!.length,
+                      itemCount: filteredProducts.length,
                       itemBuilder: (_ , index) {
                         return ProductCardAdmin(
-                          imageUrl: snapshot.data![index].fields.gambarProduk,
-                          productName: snapshot.data![index].fields.namaProduk,
-                          category: snapshot.data![index].fields.kategori,
-                          price: double.parse(snapshot.data![index].fields.harga),
+                          imageUrl: filteredProducts[index].fields.gambarProduk,
+                          productName: filteredProducts[index].fields.namaProduk,
+                          category: filteredProducts[index].fields.kategori,
+                          price: double.parse(filteredProducts[index].fields.harga),
+
+                          //TODO: Implement Edit Logic!
                           onEdit: () {
-                            // Add your edit functionality here
-                            print('Edit product: ${snapshot.data![index].fields.namaProduk}');
+                            print('Edit product: ${filteredProducts[index].fields.namaProduk}');
                           },
+
+                          //TODO: Implement Delete Logic!
                           onDelete: () {
-                            // Add your delete functionality here
-                            print('Delete product: ${snapshot.data![index].fields.namaProduk}');
+                            print('Delete product: ${filteredProducts[index].fields.namaProduk}');
                           },
                         );
                       },

@@ -77,7 +77,7 @@ class _BottomNavbarAdminState extends State<BottomNavbarAdmin> {
       ),
 
       // Single admin page
-      body: HomeAdminPage(),
+      body: const HomeAdminPage(),
 
       // Floating Action Button at bottom-right
       floatingActionButton: FloatingActionButton(

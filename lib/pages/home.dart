@@ -14,6 +14,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage>{
+  List<Product> allProducts = [];
+  List<Product> filteredProducts = [];
   Future<List<Product>> fetchProduct(CookieRequest request) async {
     // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
     final response = await request.get('http://localhost:8000/json/');
@@ -29,6 +31,15 @@ class _HomePageState extends State<HomePage>{
       }
     }
     return listProduct;
+  }
+
+  //Fungsi ini akan memilih produk yang esuai dengan kategori tertentu.
+  void filterByCategory(String category) {
+    setState(() {
+      filteredProducts = allProducts
+          .where((product) => product.fields.kategori == category)
+          .toList();
+    });
   }
 
   @override
@@ -47,7 +58,6 @@ class _HomePageState extends State<HomePage>{
             ],
           ),
 
-          //TODO: Implement filtering logic!
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: SingleChildScrollView(
@@ -56,23 +66,35 @@ class _HomePageState extends State<HomePage>{
                 children: [
                   FilterButton(
                     label: 'Semua',
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        filteredProducts = allProducts;
+                      });
+                    },
                   ),
                   FilterButton(
-                    label: 'Dasi Instan',
-                    onPressed: () {},
+                    label: 'Dasi Instant',
+                    onPressed: () {
+                      filterByCategory('Dasi Instant');
+                    },
                   ),
                   FilterButton(
                     label: 'Dasi Manual',
-                    onPressed: () {},
+                    onPressed: () {
+                      filterByCategory('Dasi Manual');
+                    },
                   ),
                   FilterButton(
-                    label: 'Dasi Kupu-kupu',
-                    onPressed: () {},
+                    label: 'Dasi Kupu-Kupu',
+                    onPressed: () {
+                      filterByCategory('Dasi Kupu-Kupu');
+                    },
                   ),
                   FilterButton(
                     label: 'Jepitan Dasi',
-                    onPressed: () {},
+                    onPressed: () {
+                      filterByCategory('Jepitan Dasi');
+                    },
                   ),
                 ],
               ),
@@ -97,6 +119,13 @@ class _HomePageState extends State<HomePage>{
                     ],
                   );
                 } else {
+
+                  //Atur nilai default untuk allProducts dan filteredProducts.
+                  allProducts = snapshot.data;
+                  if (filteredProducts.isEmpty) {
+                    filteredProducts = allProducts;
+                  }
+
                   return Expanded(
                     child: GridView.builder(
                       padding: const EdgeInsets.all(8.0),
@@ -106,13 +135,13 @@ class _HomePageState extends State<HomePage>{
                         mainAxisSpacing: 8.0,
                         childAspectRatio: 0.75, 
                       ),
-                      itemCount: snapshot.data!.length,
+                      itemCount: filteredProducts.length,
                       itemBuilder: (_ , index) {
                         return ProductCard(
-                          imageUrl: snapshot.data![index].fields.gambarProduk,
-                          productName: snapshot.data![index].fields.namaProduk,
-                          category: snapshot.data![index].fields.kategori,
-                          price: double.parse(snapshot.data![index].fields.harga),
+                          imageUrl: filteredProducts[index].fields.gambarProduk,
+                          productName: filteredProducts[index].fields.namaProduk,
+                          category: filteredProducts[index].fields.kategori,
+                          price: double.parse(filteredProducts[index].fields.harga),
                         );
                       },
                     ),
@@ -126,37 +155,3 @@ class _HomePageState extends State<HomePage>{
     );
   }
 }
-
-// class HomePage extends StatelessWidget {
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-          
-//           Expanded(
-//             child: GridView.builder(
-//               padding: const EdgeInsets.all(8.0),
-//               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-//                 crossAxisCount: 2, 
-//                 crossAxisSpacing: 8.0,
-//                 mainAxisSpacing: 8.0,
-//                 childAspectRatio: 0.75, 
-//               ),
-//               itemCount: products.length,
-//               itemBuilder: (context, index) {
-//                 return ProductCard(
-//                   imageUrl: products[index]['image'],
-//                   productName: products[index]['name'],
-//                   price: products[index]['price'],
-//                 );
-//               },
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
