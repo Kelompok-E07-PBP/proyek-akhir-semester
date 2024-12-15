@@ -36,6 +36,9 @@ class ProductCardAdmin extends StatelessWidget {
                   imageUrl,
                   fit: BoxFit.cover,
                   width: double.infinity,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.broken_image);
+                  },
                 ),
             ),
           ),

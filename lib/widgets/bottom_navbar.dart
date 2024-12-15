@@ -22,7 +22,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
     const CartPage(),
     const ShippingPage(),
     const PaymentPage(),
-    const ReviewPage(reviews: []), // TODO: Fix this!
+    const ReviewPage(),
   ];
 
   Future<void> _logout(CookieRequest request) async {
@@ -31,14 +31,17 @@ class _BottomNavbarState extends State<BottomNavbar> {
     if (context.mounted) {
       if (response['status']) {
         String uname = response["username"];
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("$message Sampai jumpa, $uname.")),
         );
         Navigator.pushReplacement(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(builder: (context) => const LoginPage()),
         );
       } else {
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(message)),
         );
