@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mujur_reborn/admin_widgets/bottom_navbar_admin.dart';
+import 'package:mujur_reborn/pages/review_form.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 
@@ -16,6 +16,7 @@ class _ReviewPageState extends State<ReviewPage> {
     final request = context.watch<CookieRequest>();
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Ulasan'),
       ),
       body: const Center(
@@ -27,6 +28,16 @@ class _ReviewPageState extends State<ReviewPage> {
             fontWeight: FontWeight.normal, // Optional styling
           ),
         ),
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: (){
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ReviewEntryFormPage()),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
