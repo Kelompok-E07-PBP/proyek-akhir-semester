@@ -2,64 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
-
-class CartItem {
-  final String id;
-  final String productName;
-  final int quantity;
-  final double price;
-  final double subtotal;
-
-  CartItem({
-    required this.id,
-    required this.productName,
-    required this.quantity,
-    required this.price,
-    required this.subtotal,
-  });
-
-  factory CartItem.fromJson(Map<String, dynamic> json) {
-    return CartItem(
-      id: json['id'],
-      productName: json['product_name'],
-      quantity: json['quantity'],
-      price: json['price'].toDouble(),
-      subtotal: json['subtotal'].toDouble(),
-    );
-  }
-}
-
-class Cart {
-  final String username;
-  final String cartId;
-  final double total;
-  final List<CartItem> items;
-  final String createdAt;
-  final String updatedAt;
-
-  Cart({
-    required this.username,
-    required this.cartId,
-    required this.total,
-    required this.items,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  factory Cart.fromJson(Map<String, dynamic> json) {
-    var itemsList = json['items'] as List;
-    List<CartItem> cartItems = itemsList.map((item) => CartItem.fromJson(item)).toList();
-
-    return Cart(
-      username: json['username'],
-      cartId: json['cart_id'],
-      total: json['total'].toDouble(),
-      items: cartItems,
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-    );
-  }
-}
+import 'package:mujur_reborn/models/cart_model.dart';
+import 'package:mujur_reborn/pages/cart_form.dart';
+import 'package:mujur_reborn/providers/navigation_provider.dart'; // Import the provider
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -70,22 +15,29 @@ class CartPage extends StatefulWidget {
 
 class _CartPageState extends State<CartPage> {
   Future<Cart> fetchCart(CookieRequest request) async {
-    final response = await request.get(
-      // 'https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/keranjang/json/',
-      'http://localhost:8000/keranjang/json/',
-    );
+    final response = await request.get('http://localhost:8000/keranjang/json/');
     return Cart.fromJson(response);
   }
 
-  Future<void> updateQuantity(CookieRequest request, String itemId, int quantity) async {
+  Future<void> updateQuantity(
+      CookieRequest request, String itemId, int quantity) async {
     try {
-      await request.post(
-        // 'https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/keranjang/update-ajax/$itemId/',
-        'http:localhost:8000/keranjang/update-ajax/$itemId/',
-        {'quantity': quantity.toString()},
-      );
-      setState(() {}); // Refresh the page
+      final url = 'http://localhost:8000/keranjang/update-keranjang-ajax/$itemId/';
+      final response = await request.post(url, {
+        'quantity': quantity.toString(),
+      });
+      debugPrint('Update Quantity Response: $response'); // Debugging
+      if (response['success'] == true) {
+        setState(() {}); // Refresh the page
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  response['message'] ?? 'Gagal memperbarui jumlah')),
+        );
+      }
     } catch (e) {
+      print('Update Quantity Error: $e'); // Debugging
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Gagal memperbarui jumlah')),
       );
@@ -94,13 +46,20 @@ class _CartPageState extends State<CartPage> {
 
   Future<void> removeItem(CookieRequest request, String itemId) async {
     try {
-      await request.post(
-        // 'https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/keranjang/hapus-ajax/$itemId/',
-        'http://localhost:8000/keranjang/hapus-ajax/$itemId/',
-        {},
-      );
-      setState(() {}); // Refresh the page
+      final url = 'http://localhost:8000/keranjang/hapus-dari-keranjang-ajax/$itemId/';
+      final response = await request.post(url, {});
+      print('Remove Item Response: $response'); // Debugging
+      if (response['success'] == true) {
+        setState(() {});
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  response['message'] ?? 'Gagal menghapus item')),
+        );
+      }
     } catch (e) {
+      print('Remove Item Error: $e'); // Debugging
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Gagal menghapus item')),
       );
@@ -110,11 +69,15 @@ class _CartPageState extends State<CartPage> {
   @override
   Widget build(BuildContext context) {
     final request = context.watch<CookieRequest>();
-    
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Keranjang Belanja'),
+        title: const Text('Keranjang Belanja',
+        style: TextStyle(color: Colors.white, fontFamily: 'Montserrat', fontWeight: FontWeight.bold, fontSize: 20)
+        ), 
         centerTitle: true,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        elevation: 2,
       ),
       body: FutureBuilder<Cart>(
         future: fetchCart(request),
@@ -122,15 +85,15 @@ class _CartPageState extends State<CartPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          
+
           if (snapshot.hasError) {
             return const Center(child: Text('Terjadi kesalahan'));
           }
-          
+
           if (!snapshot.hasData || snapshot.data!.items.isEmpty) {
             return _buildEmptyCart();
           }
-          
+
           return _buildCartContent(snapshot.data!, request);
         },
       ),
@@ -139,110 +102,74 @@ class _CartPageState extends State<CartPage> {
 
   Widget _buildEmptyCart() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.shopping_cart_outlined, size: 80),
-          const SizedBox(height: 16),
-          const Text(
-            'Keranjang belanja Anda kosong',
-            style: TextStyle(fontSize: 16),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, '/');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF03D9FF),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.shopping_cart_outlined, size: 100, color: Colors.grey),
+            const SizedBox(height: 24),
+            const Text(
+              'Keranjang belanja Anda kosong',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey,
+              ),
+              textAlign: TextAlign.center,
             ),
-            child: const Text('Lanjut Belanja!'),
-          ),
-        ],
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () {
+                // Navigate to main (BottomNavbar)
+                Navigator.pushReplacementNamed(context, '/main');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF03D9FF),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              icon: const Icon(Icons.shopping_bag, color: Colors.white),
+              label: const Text(
+                'Lanjut Belanja',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildCartContent(Cart cart, CookieRequest request) {
+    final currencyFormatter = NumberFormat.currency(
+      locale: 'id',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+
     return Column(
       children: [
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: cart.items.length,
-            itemBuilder: (context, index) {
-              final item = cart.items[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 16),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.productName,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            NumberFormat.currency(
-                              locale: 'id',
-                              symbol: 'Rp ',
-                              decimalDigits: 0,
-                            ).format(item.price),
-                          ),
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.remove),
-                                onPressed: () => updateQuantity(
-                                  request,
-                                  item.id,
-                                  item.quantity - 1,
-                                ),
-                              ),
-                              Text('${item.quantity}'),
-                              IconButton(
-                                icon: const Icon(Icons.add),
-                                onPressed: () => updateQuantity(
-                                  request,
-                                  item.id,
-                                  item.quantity + 1,
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline),
-                                onPressed: () => removeItem(request, item.id),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Subtotal:'),
-                          Text(
-                            NumberFormat.currency(
-                              locale: 'id',
-                              symbol: 'Rp ',
-                              decimalDigits: 0,
-                            ).format(item.subtotal),
-                          ),
-                        ],
-                      ),
-                    ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: ListView.builder(
+              itemCount: cart.items.length,
+              itemBuilder: (context, index) {
+                final item = cart.items[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: CartItemForm(
+                    item: item,
+                    request: request,
+                    onUpdateQuantity: (id, qty) => updateQuantity(request, id, qty),
+                    onRemoveItem: (id) => removeItem(request, id),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
         Container(
@@ -253,8 +180,13 @@ class _CartPageState extends State<CartPage> {
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
                 blurRadius: 10,
+                offset: const Offset(0, -2),
               ),
             ],
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
           ),
           child: SafeArea(
             child: Column(
@@ -265,38 +197,38 @@ class _CartPageState extends State<CartPage> {
                     const Text(
                       'Total:',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
-                      NumberFormat.currency(
-                        locale: 'id',
-                        symbol: 'Rp ',
-                        decimalDigits: 0,
-                      ).format(cart.total),
+                      currencyFormatter.format(cart.total),
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: Color(0xFF03D9FF),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Navigate to checkout
-                      Navigator.pushNamed(context, '/checkout');
+                      Provider.of<NavigationProvider>(context, listen: false).setIndex(2);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF03D9FF),
                       padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 5,
                     ),
                     child: const Text(
                       'Beli Sekarang!',
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Montserrat'),
                     ),
                   ),
                 ),

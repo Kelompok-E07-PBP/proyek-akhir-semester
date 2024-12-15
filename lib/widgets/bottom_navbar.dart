@@ -7,6 +7,7 @@ import 'package:mujur_reborn/pages/shipping.dart';
 import 'package:mujur_reborn/pages/review.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:mujur_reborn/providers/navigation_provider.dart';
 
 class BottomNavbar extends StatefulWidget {
   const BottomNavbar({super.key});
@@ -16,41 +17,31 @@ class BottomNavbar extends StatefulWidget {
 }
 
 class _BottomNavbarState extends State<BottomNavbar> {
-  int _currentIndex = 0;
-
   final List<Widget> _pages = [
     const HomePage(),
     const CartPage(),
     const ShippingPage(),
     const PaymentPage(),
-    const ReviewPage(reviews: []), //TODO: Fix this!
+    const ReviewPage(reviews: []), // TODO: Fix this!
   ];
 
   Future<void> _logout(CookieRequest request) async {
-    final response = await request.logout(
-        // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
-        "http://localhost:8000/auth/logout/");
+    final response = await request.logout("http://localhost:8000/auth/logout/");
     String message = response["message"];
     if (context.mounted) {
       if (response['status']) {
-          String uname = response["username"];
-          // ignore: use_build_context_synchronously
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text("$message Sampai jumpa, $uname."),
-          ));
-          Navigator.pushReplacement(
-              // ignore: use_build_context_synchronously
-              context,
-              MaterialPageRoute(builder: (context) => const LoginPage()),
-          );
-      } 
-      else {
-          // ignore: use_build_context_synchronously
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(message),
-              ),
-          );
+        String uname = response["username"];
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("$message Sampai jumpa, $uname.")),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
       }
     }
   }
@@ -58,6 +49,8 @@ class _BottomNavbarState extends State<BottomNavbar> {
   @override
   Widget build(BuildContext context) {
     final request = context.watch<CookieRequest>();
+    final navigationProvider = context.watch<NavigationProvider>();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -76,39 +69,37 @@ class _BottomNavbarState extends State<BottomNavbar> {
             padding: const EdgeInsets.only(right: 16.0), // Add right margin
             child: IconButton(
               icon: const Icon(Icons.logout),
-              onPressed: (){_logout(request);},
+              onPressed: () { _logout(request); },
               color: Colors.black,
             ),
           ),
         ],
       ),
-      body: _pages[_currentIndex],
+      body: _pages[navigationProvider.currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: navigationProvider.currentIndex,
         onTap: (int newIndex) {
-          setState(() {
-            _currentIndex = newIndex;
-          });
+          navigationProvider.setIndex(newIndex);
         },
         items: const [
           BottomNavigationBarItem(
-            label: "",
-            icon: Icon(Icons.add),
+            label: "Home",
+            icon: Icon(Icons.home),
           ),
           BottomNavigationBarItem(
-            label: "",
+            label: "Cart",
             icon: Icon(Icons.shopping_cart_outlined),
           ),
           BottomNavigationBarItem(
-            label: "",
+            label: "Shipping",
             icon: Icon(Icons.local_shipping_outlined),
           ),
           BottomNavigationBarItem(
-            label: "",
+            label: "Payment",
             icon: Icon(Icons.payments_outlined),
           ),
           BottomNavigationBarItem(
-            label: "",
+            label: "Review",
             icon: Icon(Icons.rate_review_outlined),
           ),
         ],
