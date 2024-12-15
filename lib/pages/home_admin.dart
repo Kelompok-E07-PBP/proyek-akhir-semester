@@ -4,6 +4,7 @@ import 'package:mujur_reborn/models/product.dart';
 import 'package:mujur_reborn/widgets/filter_button.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 class HomeAdminPage extends StatefulWidget {
   const HomeAdminPage({super.key});
@@ -15,6 +16,8 @@ class HomeAdminPage extends StatefulWidget {
 class _HomeAdminPageState extends State<HomeAdminPage>{
   List<Product> allProducts = [];
   List<Product> filteredProducts = [];
+
+  //Fungsi untuk mengatur logika fetch product dari Django
   Future<List<Product>> fetchProduct(CookieRequest request) async {
     // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
     final response = await request.get('http://localhost:8000/json/');
@@ -39,6 +42,38 @@ class _HomeAdminPageState extends State<HomeAdminPage>{
           .where((product) => product.fields.kategori == category)
           .toList();
     });
+  }
+
+  //Fungsi untuk mengatur logika delete product dari Flutter ke Django.
+  Future<void> deleteProduct(String id, BuildContext context) async {
+    final url = Uri.parse('http://localhost:8000/edit/delete-from-flutter/$id');
+    
+    try {
+      final response = await http.delete(url);
+
+      // Check if the widget is still mounted before showing the SnackBar
+      if (mounted) {
+        if (response.statusCode == 200) {
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Produk berhasil dihapus.'))
+          );
+        } else {
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Gagal hapus produk.'))
+          );
+        }
+      }
+    } catch (e) {
+      // Ensure that the widget is still mounted before using the context
+      if (mounted) {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Terjadi masalah saat menghapus produk.'))
+        );
+      }
+    }
   }
 
   @override
@@ -150,9 +185,12 @@ class _HomeAdminPageState extends State<HomeAdminPage>{
                             print('Edit product: ${filteredProducts[index].fields.namaProduk}');
                           },
 
-                          //TODO: Implement Delete Logic!
-                          onDelete: () {
-                            print('Delete product: ${filteredProducts[index].fields.namaProduk}');
+                          onDelete: () async {
+                            await deleteProduct(filteredProducts[index].pk, context);
+                            setState(() {
+                              allProducts.removeWhere((product) => product.pk == filteredProducts[index].pk);
+                              filteredProducts.removeAt(index);
+                            });
                           },
                         );
                       },
