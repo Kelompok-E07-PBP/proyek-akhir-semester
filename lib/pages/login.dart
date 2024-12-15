@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:mujur_reborn/pages/register.dart';
 import 'package:mujur_reborn/admin_widgets/bottom_navbar_admin.dart';
 
+String globalUname = "";
+
 void main() {
   runApp(const LoginApp());
 }
@@ -110,10 +112,10 @@ class _LoginPageState extends State<LoginPage> {
                         'password': password,
                       });
 
-                      //TODO: Add the logic for admin or user redirection.
                       if (request.loggedIn) {
                         String message = response['message'];
                         String uname = response['username'];
+                        globalUname = response['username'];
                         bool isAdmin = response['isAdmin'];
 
                         // Bagian ini akan melakukan routing user ke halaman tertentu sesuai peran.

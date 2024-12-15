@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mujur_reborn/admin_widgets/bottom_navbar_admin.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
@@ -104,7 +105,6 @@ class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
                 ),
               ),
 
-
               //Bagian untuk mengatur input harga produk.
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -116,6 +116,10 @@ class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
                       borderRadius: BorderRadius.circular(5.0),
                     ),
                   ),
+                  keyboardType: TextInputType.number, // Pastikan keyboard numeric yang keluar.
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d+')), // Hanya boleh bilangan bulat.
+                  ],
                   onChanged: (String? value) {
                     setState(() {
                       _harga = int.tryParse(value!) ?? 0;
@@ -126,15 +130,22 @@ class _ProductEntryFormPageState extends State<ProductEntryFormPage> {
                       return "Harga produk tidak boleh kosong!";
                     }
 
-                    final parsedValue = int.tryParse(value);
-
+                    // Periksa apakah nilai yang dimasukkan valid.
+                    final parsedValue = num.tryParse(value);
                     if (parsedValue == null) {
                       return "Harga produk harus berupa angka!";
                     }
-                    
+
+                    // Periksa apakah nilai yang dimasukkan adalah bilangan bulat atau tidak.
+                    if (parsedValue is double && parsedValue % 1 != 0) {
+                      return "Harga produk harus bilangan bulat!";
+                    }
+
+                    // Patikan harga positif.
                     if (parsedValue <= 0) {
                       return "Harga produk harus lebih dari 0!";
                     }
+
                     return null;
                   },
                 ),

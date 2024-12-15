@@ -56,6 +56,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // Supaya tidak ada back arrow
         backgroundColor: Colors.white,
         elevation: 0,
         title: Row(
