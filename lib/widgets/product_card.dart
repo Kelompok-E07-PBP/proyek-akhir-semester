@@ -5,12 +5,14 @@ class ProductCard extends StatefulWidget {
   final String productName;
   final String category;
   final double price;
+  final void Function(int quantity)? onAddToCart;
 
   const ProductCard({
     required this.imageUrl,
     required this.productName,
     required this.category,
     required this.price,
+    this.onAddToCart,
     super.key,
   });
 
@@ -46,6 +48,7 @@ class _ProductCardState extends State<ProductCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Product Image
           Expanded(
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
@@ -54,64 +57,109 @@ class _ProductCardState extends State<ProductCard> {
                 fit: BoxFit.cover,
                 width: double.infinity,
                 errorBuilder: (context, error, stackTrace) {
-                    return const Icon(Icons.broken_image);
+                  return const Icon(Icons.broken_image, size: 50, color: Colors.grey);
                 },
               ),
             ),
           ),
-          
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              widget.productName,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              widget.category,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(
-              'Rp ${widget.price.toStringAsFixed(3)}',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.green,
-              ),
+          // Bottom section with a subtle background color and padding
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.blueGrey[50],
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),
             ),
-          ),
-          
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.remove),
-                  onPressed: _decrement,
-                ),
-                Text(
-                  '$_quantity',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: _increment,
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Product name
+                  Text(
+                    widget.productName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  // A subtle divider
+                  Divider(color: Colors.grey.shade300, thickness: 1),
+
+                  const SizedBox(height: 4),
+
+                  // Category
+                  Text(
+                    widget.category,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black54,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Price
+                  Text(
+                    'Rp ${widget.price.toStringAsFixed(3)}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.green,
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Quantity selector
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove, color: Colors.black87),
+                        onPressed: _decrement,
+                      ),
+                      Text(
+                        '$_quantity',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add, color: Colors.black87),
+                        onPressed: _increment,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Add to Cart button
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      if (_quantity > 0) {
+                        widget.onAddToCart?.call(_quantity);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Pilih jumlah yang lebih dari 0 sebelum menambahkan ke keranjang.'),
+                          ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.shopping_cart, color: Colors.white),
+                    label: const Text('Tambah ke Keranjang', style: TextStyle(color: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue[800],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

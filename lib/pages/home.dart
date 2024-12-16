@@ -13,17 +13,24 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>{
+class _HomePageState extends State<HomePage> {
   List<Product> allProducts = [];
   List<Product> filteredProducts = [];
+  bool dataLoaded = false; // <-- Add a flag to indicate data initialization
+
+  late Future<List<Product>> productFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    final request = Provider.of<CookieRequest>(context, listen: false);
+    productFuture = fetchProduct(request); // load data once
+  }
+
   Future<List<Product>> fetchProduct(CookieRequest request) async {
-    // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
     final response = await request.get('http://localhost:8000/json/');
-    
-    // Melakukan decode response menjadi bentuk json
     var data = response;
-    
-    // Melakukan konversi data json menjadi object Product
+
     List<Product> listProduct = [];
     for (var d in data) {
       if (d != null) {
@@ -33,13 +40,29 @@ class _HomePageState extends State<HomePage>{
     return listProduct;
   }
 
-  //Fungsi ini akan memilih produk yang esuai dengan kategori tertentu.
   void filterByCategory(String category) {
     setState(() {
       filteredProducts = allProducts
           .where((product) => product.fields.kategori == category)
           .toList();
     });
+  }
+
+  Future<void> addToCart(CookieRequest request, Product product, int quantity) async {
+    final url = 'http://localhost:8000/keranjang/tambah-ke-keranjang-ajax/${product.pk}/';
+    final response = await request.post(url, {
+      'quantity': quantity.toString(),
+    });
+
+    if (response != null && response['success'] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response['message'] ?? 'Berhasil menambahkan ke keranjang!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response?['message'] ?? 'Gagal menambahkan ke keranjang.')),
+      );
+    }
   }
 
   @override
@@ -68,7 +91,7 @@ class _HomePageState extends State<HomePage>{
                     label: 'Semua',
                     onPressed: () {
                       setState(() {
-                        filteredProducts = allProducts;
+                        filteredProducts = List.from(allProducts);
                       });
                     },
                   ),
@@ -100,40 +123,33 @@ class _HomePageState extends State<HomePage>{
               ),
             ),
           ),
-          
+
           FutureBuilder(
-            future: fetchProduct(request),
+            future: productFuture,
             builder: (context, AsyncSnapshot snapshot) {
-            if (snapshot.data == null) {
-              return const Center(child: CircularProgressIndicator());
-            } else {
-                if (!snapshot.hasData) {
-                  return const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Belum ada data produk pada Mujur Reborn.',
-                        style: TextStyle(fontSize: 20, color: Color(0xFF00ACED)),
-                      ),
-                      SizedBox(height: 8),
-                    ],
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                if (snapshot.data.isEmpty) {
+                  return const Center(
+                    child: Text('Belum ada data produk pada Mujur Reborn.'),
                   );
                 } else {
-
-                  //Atur nilai default untuk allProducts dan filteredProducts.
-                  allProducts = snapshot.data;
-                  if (filteredProducts.isEmpty) {
-                    filteredProducts = allProducts;
+                  // Only initialize once
+                  if (!dataLoaded) {
+                    allProducts = snapshot.data;
+                    filteredProducts = List.from(allProducts);
+                    dataLoaded = true;
                   }
 
                   return Expanded(
                     child: GridView.builder(
                       padding: const EdgeInsets.all(8.0),
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2, 
+                        crossAxisCount: 2,
                         crossAxisSpacing: 8.0,
                         mainAxisSpacing: 8.0,
-                        childAspectRatio: 0.75, 
+                        childAspectRatio: 0.75,
                       ),
                       itemCount: filteredProducts.length,
                       itemBuilder: (_ , index) {
@@ -142,13 +158,16 @@ class _HomePageState extends State<HomePage>{
                           productName: filteredProducts[index].fields.namaProduk,
                           category: filteredProducts[index].fields.kategori,
                           price: double.parse(filteredProducts[index].fields.harga),
+                          onAddToCart: (int quantity) {
+                            addToCart(request, filteredProducts[index], quantity);
+                          },
                         );
                       },
                     ),
                   );
                 }
               }
-            }
+            },
           ),
         ],
       ),
