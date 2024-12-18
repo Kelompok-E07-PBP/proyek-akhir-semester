@@ -16,6 +16,7 @@ class _PaymentPageState extends State<PaymentPage> {
   double totalHarga = 0.0;
   String? selectedPaymentMethod;
   bool isLoading = false;
+  bool isFetchingData = true; // Tambahkan variabel ini
 
   @override
   void initState() {
@@ -25,6 +26,9 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   Future<void> fetchData(CookieRequest request) async {
+    setState(() {
+      isFetchingData = true; // Mulai pemuatan data
+    });
     try {
       final response = await request.get('http://localhost:8000/keranjang/json/');
       setState(() {
@@ -38,6 +42,10 @@ class _PaymentPageState extends State<PaymentPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Gagal memuat data keranjang')),
       );
+    } finally {
+      setState(() {
+        isFetchingData = false; // Selesai pemuatan data
+      });
     }
   }
 
@@ -53,8 +61,9 @@ class _PaymentPageState extends State<PaymentPage> {
 
     try {
       final response = await request.post(
-        'http://localhost:8000/pembayaran/process_payment_ajax/',
+        'http://localhost:8000/pembayaran/pembayaran/process/',
         {'payment_method': selectedPaymentMethod},
+
       );
 
       if (response['message'] == 'Payment successful!') {
@@ -116,36 +125,70 @@ class _PaymentPageState extends State<PaymentPage> {
         title: const Text('Pembayaran', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
-      body: keranjangItems.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 16),
-                  _buildCartTable(),
-                  const SizedBox(height: 16),
-                  _buildTotalHargaSection(),
-                  const SizedBox(height: 16),
-                  _buildPaymentMethods(),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: isLoading ? null : () => processPayment(request),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.lightBlue,
-                      minimumSize: const Size(300, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Bayar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                  ),
-                  const SizedBox(height: 16),
-                ],
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (isFetchingData) {
+      // Data masih dimuat
+      return const Center(child: CircularProgressIndicator());
+    } else if (keranjangItems.isEmpty) {
+      // Keranjang kosong
+      return _buildEmptyCart();
+    } else {
+      // Tampilkan keranjang
+      return SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 16),
+            _buildCartTable(),
+            const SizedBox(height: 16),
+            _buildTotalHargaSection(),
+            const SizedBox(height: 16),
+            _buildPaymentMethods(),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: isLoading ? null : () => processPayment(context.read<CookieRequest>()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.lightBlue,
+                minimumSize: const Size(300, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
+              child: isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text(
+                      'Bayar',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
             ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      );
+    }
+  }
+
+  Widget _buildEmptyCart() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(
+            Icons.shopping_cart_outlined,
+            size: 100,
+            color: Colors.grey,
+          ),
+          SizedBox(height: 20),
+          Text(
+            'Keranjang Kosong',
+            style: TextStyle(fontSize: 24, color: Colors.grey),
+          ),
+        ],
+      ),
     );
   }
 
@@ -235,7 +278,13 @@ class _PaymentPageState extends State<PaymentPage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-        Text(value, style: TextStyle(fontWeight: isBold ? FontWeight.bold : FontWeight.normal, fontSize: isBold ? 18 : 14)),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            fontSize: isBold ? 18 : 14,
+          ),
+        ),
       ],
     );
   }
