@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:mujur_reborn/providers/navigation_provider.dart'; // Import the provider
 
 class PaymentPage extends StatefulWidget {
   const PaymentPage({Key? key}) : super(key: key);
@@ -16,52 +15,69 @@ class _PaymentPageState extends State<PaymentPage> {
   double deliveryFee = 0.0;
   double totalHarga = 0.0;
   String? selectedPaymentMethod;
+  bool isLoading = false;
+  bool isFetchingData = true; // Tambahkan variabel ini
 
   @override
   void initState() {
     super.initState();
-    // Delay the fetch to ensure context is available
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final request = context.read<CookieRequest>();
-      fetchData(request);
-    });
+    final request = context.read<CookieRequest>();
+    fetchData(request);
   }
 
   Future<void> fetchData(CookieRequest request) async {
+    setState(() {
+      isFetchingData = true; // Mulai pemuatan data
+    });
     try {
       final response = await request.get('http://localhost:8000/keranjang/json/');
-      print('Response body: $response');
       setState(() {
         keranjangItems = response['items'] ?? [];
         city = response['pengiriman']?['city'];
-        deliveryFee = response['delivery_fee']?.toDouble() ?? 0.0;
-        totalHarga = response['total']?.toDouble() ?? 0.0;
+        deliveryFee = response['delivery_fee'] ?? 0.0;
+        totalHarga = response['total'] ?? 0.0;
       });
     } catch (e) {
       print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gagal memuat data keranjang')),
+      );
+    } finally {
+      setState(() {
+        isFetchingData = false; // Selesai pemuatan data
+      });
     }
   }
 
   Future<void> processPayment(CookieRequest request) async {
     if (selectedPaymentMethod == null) {
-      showErrorDialog('Silakan pilih metode pembayaran.');
+      showErrorDialog("Silakan pilih metode pembayaran.");
       return;
     }
 
+    setState(() {
+      isLoading = true;
+    });
+
     try {
       final response = await request.post(
-        'http://localhost:8000/pembayaran/process/',
+        'http://localhost:8000/pembayaran/pembayaran/process/',
         {'payment_method': selectedPaymentMethod},
+
       );
 
       if (response['message'] == 'Payment successful!') {
-        showSuccessDialog('Pembayaran berhasil dilakukan!');
-      } else if (response['error'] != null) {
-        showErrorDialog(response['error']);
+        showSuccessDialog("Pembayaran berhasil dilakukan!");
+      } else {
+        showErrorDialog(response['error'] ?? 'Gagal memproses pembayaran.');
       }
     } catch (e) {
       print('Error: $e');
-      showErrorDialog('Terjadi kesalahan saat melakukan pembayaran.');
+      showErrorDialog("Terjadi kesalahan saat memproses pembayaran.");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -75,11 +91,10 @@ class _PaymentPageState extends State<PaymentPage> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              // Use NavigationProvider to switch to Home tab or any other desired tab
-              Provider.of<NavigationProvider>(context, listen: false).setIndex(0);
+              Navigator.of(context).pushReplacementNamed('/main');
             },
             child: const Text('OK'),
-          )
+          ),
         ],
       ),
     );
@@ -95,7 +110,7 @@ class _PaymentPageState extends State<PaymentPage> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('OK'),
-          )
+          ),
         ],
       ),
     );
@@ -107,78 +122,196 @@ class _PaymentPageState extends State<PaymentPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pembayaran'),
+        title: const Text('Pembayaran', style: TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
       ),
-      body: keranjangItems.isEmpty
-          ? const Center(child: Text('Keranjang Anda kosong.'))
-          : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ... [Existing Table and Details Code]
+      body: _buildBody(),
+    );
+  }
 
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Metode Pembayaran:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        RadioListTile(
-                          title: const Text('Kartu Kredit'),
-                          value: 'Kartu Kredit',
-                          groupValue: selectedPaymentMethod,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedPaymentMethod = value as String?;
-                            });
-                          },
-                        ),
-                        RadioListTile(
-                          title: const Text('Kartu Debit'),
-                          value: 'Kartu Debit',
-                          groupValue: selectedPaymentMethod,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedPaymentMethod = value as String?;
-                            });
-                          },
-                        ),
-                        RadioListTile(
-                          title: const Text('Transfer Bank'),
-                          value: 'Transfer Bank',
-                          groupValue: selectedPaymentMethod,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedPaymentMethod = value as String?;
-                            });
-                          },
-                        ),
-                        RadioListTile(
-                          title: const Text('E-Wallet'),
-                          value: 'E-Wallet',
-                          groupValue: selectedPaymentMethod,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedPaymentMethod = value as String?;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () => processPayment(request),
-                          child: const Text('Bayar', style: TextStyle(fontSize: 16)),
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(double.infinity, 50),
-                            backgroundColor: Colors.blue,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                    ),
-                  ),
-                ],
+  Widget _buildBody() {
+    if (isFetchingData) {
+      // Data masih dimuat
+      return const Center(child: CircularProgressIndicator());
+    } else if (keranjangItems.isEmpty) {
+      // Keranjang kosong
+      return _buildEmptyCart();
+    } else {
+      // Tampilkan keranjang
+      return SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 16),
+            _buildCartTable(),
+            const SizedBox(height: 16),
+            _buildTotalHargaSection(),
+            const SizedBox(height: 16),
+            _buildPaymentMethods(),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: isLoading ? null : () => processPayment(context.read<CookieRequest>()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.lightBlue,
+                minimumSize: const Size(300, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
+              child: isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text(
+                      'Bayar',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
             ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      );
+    }
+  }
+
+  Widget _buildEmptyCart() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(
+            Icons.shopping_cart_outlined,
+            size: 100,
+            color: Colors.grey,
+          ),
+          SizedBox(height: 20),
+          Text(
+            'Keranjang Kosong',
+            style: TextStyle(fontSize: 24, color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCartTable() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Table(
+        border: TableBorder.all(color: Colors.grey, width: 1),
+        columnWidths: const {
+          0: FlexColumnWidth(3),
+          1: FlexColumnWidth(2),
+          2: FlexColumnWidth(1),
+          3: FlexColumnWidth(2),
+        },
+        children: [
+          _buildTableHeader(),
+          ...keranjangItems.map((item) {
+            return _buildTableRow(item);
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  TableRow _buildTableHeader() {
+    return TableRow(
+      decoration: const BoxDecoration(color: Colors.lightBlue),
+      children: [
+        _buildHeaderCell('Produk'),
+        _buildHeaderCell('Harga Satuan'),
+        _buildHeaderCell('Jumlah'),
+        _buildHeaderCell('Subtotal'),
+      ],
+    );
+  }
+
+  Widget _buildHeaderCell(String title) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  TableRow _buildTableRow(Map<String, dynamic> item) {
+    return TableRow(
+      children: [
+        _buildCell(item['product_name']),
+        _buildCell('Rp ${item['price']}'),
+        _buildCell('${item['quantity']}'),
+        _buildCell('Rp ${item['subtotal']}'),
+      ],
+    );
+  }
+
+  Widget _buildCell(String text) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Text(text, textAlign: TextAlign.center),
+    );
+  }
+
+  Widget _buildTotalHargaSection() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.lightBlue[50],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          _buildPriceRow('Delivery City', city ?? '-'),
+          _buildPriceRow('Delivery Fee', 'Rp $deliveryFee'),
+          const Divider(color: Colors.grey),
+          _buildPriceRow('Total Harga', 'Rp $totalHarga', isBold: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPriceRow(String label, String value, {bool isBold = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            fontSize: isBold ? 18 : 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPaymentMethods() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _buildRadioOption('Kartu Kredit'),
+        _buildRadioOption('Kartu Debit'),
+        _buildRadioOption('Transfer Bank'),
+        _buildRadioOption('E-Wallet'),
+      ],
+    );
+  }
+
+  Widget _buildRadioOption(String method) {
+    return Center(
+      child: SizedBox(
+        width: 300,
+        child: RadioListTile(
+          title: Center(child: Text(method)),
+          value: method,
+          groupValue: selectedPaymentMethod,
+          onChanged: (value) => setState(() => selectedPaymentMethod = value),
+        ),
+      ),
     );
   }
 }
