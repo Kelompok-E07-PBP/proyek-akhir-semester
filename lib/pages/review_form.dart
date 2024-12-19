@@ -1,195 +1,117 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:mujur_reborn/pages/login.dart';
-import 'package:mujur_reborn/pages/review.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
 
-// TODO: REVIEW = ULASAN!
-class ReviewEntryFormPage extends StatefulWidget {
-  const ReviewEntryFormPage({super.key});
+class ReviewFormPage extends StatefulWidget {
+  final Map<String, dynamic>? reviewData;
+  final bool isEditing;
+
+  const ReviewFormPage({Key? key, this.reviewData, required this.isEditing}) : super(key: key);
 
   @override
-  State<ReviewEntryFormPage> createState() => _ReviewEntryFormPageState();
+  State<ReviewFormPage> createState() => _ReviewFormPageState();
 }
 
-class _ReviewEntryFormPageState extends State<ReviewEntryFormPage> {
+class _ReviewFormPageState extends State<ReviewFormPage> {
   final _formKey = GlobalKey<FormState>();
+  String _namaProduk = '';
+  String _komentar = '';
+  int? _rating;
 
-  String _namaProdukUlas = "";
-	int _rating = 0;
-  String _komentar = "";
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isEditing && widget.reviewData != null) {
+      _namaProduk = widget.reviewData!['nama_produk_ulas'] ?? '';
+      _komentar = widget.reviewData!['komentar'] ?? '';
+      _rating = widget.reviewData!['rating'];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Center(
-          child: Text(
-            'Form Tambah Ulasan',
-          ),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+        title: Text(widget.isEditing ? 'Edit Ulasan Produk' : 'Tambah Ulasan Produk'),
       ),
-      // TODO: Tambahkan drawer yang sudah dibuat di sini
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
             children: [
-
-              //Bagian input nama produk yang akan diulas.
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: "Nama produk yang akan diulas",
-                    labelText: "Nama Produk Ulas",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  onChanged: (String? value) {
-                    setState(() {
-                      _namaProdukUlas = value!;
-                    });
-                  },
-                  validator: (String? value) {
-                    if (value == null || value.isEmpty) {
-                      return "Nama produk ulas tidak boleh kosong!";
-                    }
-                    return null;
-                  },
-                ),
-              ),
-
-              // Bagian input rating
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: "Rating dari 1 sampai 5.",
-                    labelText: "Rating",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  keyboardType: TextInputType.number, // Pastikan keyboard numeric yang keluar.
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.allow(RegExp(r'^\d+$')), // Hanya boleh bilangan bulat.
-                  ],
-                  onChanged: (String? value) {
-                    setState(() {
-                      _rating = int.tryParse(value!) ?? 0;
-                    });
-                  },
-                  validator: (String? value) {
-                    if (value == null || value.isEmpty) {
-                      return "Rating tidak boleh kosong!";
-                    }
-
-                    // Periksa apakah nilai yang dimasukkan valid.
-                    final parsedValue = num.tryParse(value);
-                    if (parsedValue == null) {
-                      return "Rating harus berupa angka!";
-                    }
-
-                    // Priksa apakah nilainya bilangan bulat atau tidak.
-                    if (parsedValue is double && parsedValue % 1 != 0) {
-                      return "Rating harus bilangan bulat!";
-                    }
-
-                    // Pastikan nilai rating antara 1 sampai 5.
-                    if (parsedValue < 1 || parsedValue > 5) {
-                      return "Rating harus antara 1-5!";
-                    }
-
-                    return null;
-                  },
-                ),
-              ),
-
-              // Bagian input komentar.
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: "Isi komentarmu di sini",
-                    labelText: "Komentar",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  maxLines: 5, // Atur jumlah baris kotak komentar di sini
-                  onChanged: (String? value) {
-                    setState(() {
-                      _komentar = value!;
-                    });
-                  },
-                  validator: (String? value) {
-                    if (value == null || value.isEmpty) {
-                      return "Komentar tidak boleh kosong!";
-                    }
-                    return null;
-                  },
-                ),
-              ),
-
-              //Tombol simpan ulasan
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                      // ignore: deprecated_member_use
-                      backgroundColor: MaterialStateProperty.all(
-                          Theme.of(context).colorScheme.primary),
-                    ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text('Mood berhasil tersimpan'),
-                              content: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Nama Pengguna: $globalUname'),
-                                    const Text('Waktu: waktu sekarang'),
-                                    Text('Nama Produk Ulas: $_namaProdukUlas'),
-                                    Text('Rating: $_rating'),
-                                    Text('Komentar: $_komentar'),
-                                  ],
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  child: const Text('OK'),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    _formKey.currentState!.reset();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }
-                    },
-                    child: const Text(
-                      "Save",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
+              _buildTextField('Nama Produk', 'Masukkan nama produk', (value) => _namaProduk = value),
+              const SizedBox(height: 16.0),
+              _buildTextField('Komentar', 'Masukkan komentar', (value) => _komentar = value, maxLines: 3),
+              const SizedBox(height: 16.0),
+              _buildRatingField(),
+              const SizedBox(height: 24.0),
+              _buildSaveButton(),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildTextField(String label, String hint, Function(String) onChanged, {int maxLines = 1}) {
+    return TextFormField(
+      initialValue: widget.isEditing ? (label == 'Nama Produk' ? _namaProduk : _komentar) : '',
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+      ),
+      maxLines: maxLines,
+      onChanged: onChanged,
+      validator: (value) => value!.isEmpty ? '$label tidak boleh kosong!' : null,
+    );
+  }
+
+  Widget _buildRatingField() {
+    return DropdownButtonFormField<int>(
+      decoration: InputDecoration(
+        labelText: 'Rating',
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+      ),
+      value: _rating,
+      items: [1, 2, 3, 4, 5].map((int value) {
+        return DropdownMenuItem(value: value, child: Text(value.toString()));
+      }).toList(),
+      onChanged: (value) => setState(() => _rating = value),
+      validator: (value) {
+        if (value == null) return 'Pilih rating dari 1 hingga 5';
+        return null;
+      },
+    );
+  }
+
+  Widget _buildSaveButton() {
+    return ElevatedButton(
+      onPressed: _saveReview,
+      style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+      child: Text(widget.isEditing ? 'Simpan Perubahan' : 'Simpan Ulasan'),
+    );
+  }
+
+  void _saveReview() async {
+    if (_formKey.currentState!.validate()) {
+      final reviewData = {
+        'nama_produk_ulas': _namaProduk,
+        'komentar': _komentar,
+        'rating': _rating.toString(),
+      };
+
+    try {
+      final url = widget.isEditing
+          ? Uri.parse('http://localhost:8000/ulasan/edit-ulasan-ajax/${widget.reviewData!['id']}/').toString()
+          : Uri.parse('http://localhost:8000/ulasan/create-ulasan-entry-ajax/').toString();
+
+      final response = await CookieRequest().post(url, reviewData);
+      Navigator.pop(context);
+    } catch (e) {
+      print('Error: $e');
+    }
+
+    }
   }
 }
