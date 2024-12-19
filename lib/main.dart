@@ -42,7 +42,8 @@ class MyApp extends StatelessWidget {
       // Define the named routes
       routes: {
         '/': (context) => const LoginPage(),
-        '/main': (context) => const BottomNavbar(), // Main route with BottomNavbar
+        '/main': (context) =>
+            const BottomNavbar(), // Main route with BottomNavbar
       },
     );
   }
