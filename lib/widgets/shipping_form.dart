@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ShippingForm extends StatefulWidget {
   final Function(Map<String, String>) onSubmit;
 
-  const ShippingForm({Key? key, required this.onSubmit}) : super(key: key);
+  const ShippingForm({super.key, required this.onSubmit});
 
   @override
   _ShippingFormState createState() => _ShippingFormState();
@@ -46,13 +46,7 @@ class _ShippingFormState extends State<ShippingForm> {
       child: Form(
         key: _formKey,
         child: ListView(
-          children: [
-            const Text(
-              'Informasi Pengiriman',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-            
+          children: [            
             // First Name
             _buildTextField('Nama Depan', 'first_name'),
             const SizedBox(height: 16),
@@ -91,7 +85,7 @@ class _ShippingFormState extends State<ShippingForm> {
               child: ElevatedButton(
                 onPressed: _submitForm,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[800],
+                  backgroundColor: Theme.of(context).primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),

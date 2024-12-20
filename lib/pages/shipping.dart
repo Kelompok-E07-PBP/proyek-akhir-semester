@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:mujur_reborn/pages/payment.dart';
 import 'package:mujur_reborn/providers/navigation_provider.dart';
+import 'package:mujur_reborn/widgets/empty_cart.dart';
 import 'package:mujur_reborn/widgets/shipping_form.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:mujur_reborn/widgets/checkout_progress.dart'; // Add this
 
 class ShippingPage extends StatefulWidget {
-  const ShippingPage({Key? key}) : super(key: key);
+  const ShippingPage({super.key});
 
   @override
   _ShippingPageState createState() => _ShippingPageState();
@@ -48,7 +49,6 @@ class _ShippingPageState extends State<ShippingPage> {
     setState(() => isLoading = true);
 
     try {
-
       final response = await request.post(
         'http://localhost:8000/pengiriman/process_pengiriman_ajax/',
         formData,
@@ -107,53 +107,29 @@ class _ShippingPageState extends State<ShippingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pengiriman'),
-        centerTitle: true,
-      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : cartItems.isEmpty
               ? _buildEmptyCart()
-              : ShippingForm(
-                  onSubmit: _submitShippingForm,
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: CheckoutProgress(currentStep: 1),
+                    ),
+                    Expanded(
+                      child: ShippingForm(
+                        onSubmit: _submitShippingForm,
+                      ),
+                    ),
+                  ],
                 ),
     );
   }
 
   Widget _buildEmptyCart() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.shopping_cart_outlined,
-            size: 100,
-            color: Colors.grey,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Keranjang kosong. Silakan tambahkan item ke keranjang.',
-            style: TextStyle(fontSize: 18, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => Navigator.pushReplacementNamed(context, '/cart'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              backgroundColor: Colors.lightBlue,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text(
-              'Lanjut Belanja',
-              style: TextStyle(fontSize: 16, color: Colors.white),
-            ),
-          ),
-        ],
-      ),
+    return const EmptyCartWidget(
+      message: 'Keranjang belanja Anda kosong',
     );
   }
 }
