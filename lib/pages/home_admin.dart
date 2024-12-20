@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mujur_reborn/admin_widgets/product_card_admin.dart';
 import 'package:mujur_reborn/models/product.dart';
+import 'package:mujur_reborn/pages/edit_productentry_form.dart';
 import 'package:mujur_reborn/widgets/filter_button.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
@@ -44,14 +46,43 @@ class _HomeAdminPageState extends State<HomeAdminPage>{
     });
   }
 
+  //Fungsi ini akan mengambil produk tertentu dan update hasilnya sesuai dengan konten dari form edit.
+  Future<void> updateProduct(Product updatedProduct) async {
+
+    // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
+    final response = await http.put(
+      Uri.parse('http://localhost:8000/edit/update-from-flutter/${updatedProduct.pk}'),
+      body: jsonEncode(updatedProduct.toJson()),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      // Update the local lists
+      setState(() {
+        allProducts = allProducts.map((product) {
+          if (product.pk == updatedProduct.pk) {
+            return updatedProduct; // Update the specific product
+          }
+          return product;
+        }).toList();
+
+        filteredProducts = filteredProducts.map((product) {
+          if (product.pk == updatedProduct.pk) {
+            return updatedProduct; // Update the specific product
+          }
+          return product;
+        }).toList();
+      });
+    }
+  }
+
+
   //Fungsi untuk mengatur logika delete product dari Flutter ke Django.
   Future<void> deleteProduct(String id, BuildContext context) async {
     final url = Uri.parse('http://localhost:8000/edit/delete-from-flutter/$id');
     
     try {
       final response = await http.delete(url);
-
-      // Check if the widget is still mounted before showing the SnackBar
       if (mounted) {
         if (response.statusCode == 200) {
           // ignore: use_build_context_synchronously
@@ -66,7 +97,6 @@ class _HomeAdminPageState extends State<HomeAdminPage>{
         }
       }
     } catch (e) {
-      // Ensure that the widget is still mounted before using the context
       if (mounted) {
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
@@ -182,9 +212,17 @@ class _HomeAdminPageState extends State<HomeAdminPage>{
 
                           //TODO: Implement Edit Logic!
                           onEdit: () {
-                            print('Edit product: ${filteredProducts[index].fields.namaProduk}');
+                            Navigator.push(
+                              context, 
+                              MaterialPageRoute(builder: (context) => EditProductEntryFormPage(
+                                  product: filteredProducts[index],
+                                  updateProduct: updateProduct, //Berikan fungsi update ke form
+                                )
+                              ),
+                            );
                           },
 
+                          //Bagian ini akan memanggil method untuk menghapus produk yang ingin dihapus.
                           onDelete: () async {
                             await deleteProduct(filteredProducts[index].pk, context);
                             setState(() {

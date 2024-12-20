@@ -36,7 +36,7 @@ class _ReviewPageState extends State<ReviewPage> {
 
   Future<void> removeReview(CookieRequest request, String reviewId) async {
     try {
-      final url = 'http://localhost:8000/ulasan/delete-ulasan-ajax/$reviewId/'; ;
+      final url = 'http://localhost:8000/ulasan/delete-ulasan-ajax/$reviewId/';
       final response = await request.post(url, {});
       if (response['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -110,15 +110,15 @@ class _ReviewPageState extends State<ReviewPage> {
   }
 
   Widget _buildEmptyReview() {
-    return Center(
+    return const Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.rate_review_outlined, size: 100, color: Colors.grey),
-            const SizedBox(height: 24),
-            const Text(
+            Icon(Icons.rate_review_outlined, size: 100, color: Colors.grey),
+            SizedBox(height: 24),
+            Text(
               'Belum ada ulasan',
               style: TextStyle(
                 fontSize: 18,
