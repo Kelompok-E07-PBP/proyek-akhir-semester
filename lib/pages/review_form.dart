@@ -5,7 +5,7 @@ class ReviewFormPage extends StatefulWidget {
   final Map<String, dynamic>? reviewData;
   final bool isEditing;
 
-  const ReviewFormPage({Key? key, this.reviewData, required this.isEditing}) : super(key: key);
+  const ReviewFormPage({super.key, this.reviewData, required this.isEditing});
 
   @override
   State<ReviewFormPage> createState() => _ReviewFormPageState();

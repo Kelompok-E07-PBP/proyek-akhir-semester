@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mujur_reborn/widgets/button.dart';
 
 class ProductCard extends StatefulWidget {
   final String imageUrl;
@@ -137,7 +138,10 @@ class _ProductCardState extends State<ProductCard> {
                   const SizedBox(height: 8),
 
                   // Add to Cart button
-                  ElevatedButton.icon(
+                  // Add to Cart button using CustomButton
+                  CustomButton(
+                    text: 'Add to Cart',
+                    icon: Icons.shopping_cart_outlined,
                     onPressed: () {
                       if (_quantity > 0) {
                         widget.onAddToCart?.call(_quantity);
@@ -149,13 +153,11 @@ class _ProductCardState extends State<ProductCard> {
                         );
                       }
                     },
-                    icon: const Icon(Icons.shopping_cart, color: Colors.white),
-                    label: const Text('Tambah ke Keranjang', style: TextStyle(color: Colors.white)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[800],
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
+                    backgroundColor: Theme.of(context).primaryColor,
+                    textStyle: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal, // Not bold
                     ),
                   ),
                 ],

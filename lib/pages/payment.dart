@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mujur_reborn/pages/home.dart';
-import 'package:mujur_reborn/pages/shipping.dart';
+import 'package:mujur_reborn/widgets/button.dart';
+import 'package:mujur_reborn/widgets/empty_cart.dart';
+import 'package:mujur_reborn/widgets/empty_shipping.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:mujur_reborn/widgets/checkout_progress.dart'; // Add this
 
 class PaymentPage extends StatefulWidget {
-  const PaymentPage({Key? key}) : super(key: key);
+  const PaymentPage({super.key});
 
   @override
   _PaymentPageState createState() => _PaymentPageState();
@@ -19,7 +21,7 @@ class _PaymentPageState extends State<PaymentPage> {
   double totalHarga = 0.0;
   String? selectedPaymentMethod;
   bool isLoading = false;
-  bool isFetchingData = true; // Tambahkan variabel ini
+  bool isFetchingData = true;
 
   @override
   void initState() {
@@ -30,21 +32,16 @@ class _PaymentPageState extends State<PaymentPage> {
 
   Future<void> fetchData(CookieRequest request) async {
     setState(() {
-      isFetchingData = true; // Mulai pemuatan data
+      isFetchingData = true;
     });
     try {
       // Ambil data keranjang dan pengiriman
       final response = await request.get('http://localhost:8000/pembayaran/keranjang-pengiriman/json');
 
       setState(() {
-        // Data keranjang
         keranjangItems = response['keranjang']['items'] ?? [];
-        
-        // Data pengiriman
         city = response['pengiriman']?['city'];
         deliveryFee = response['pengiriman']?['delivery_fee'] ?? 0.0;
-
-        // Total harga
         totalHarga = response['total_harga'] ?? 0.0;
       });
     } catch (e) {
@@ -54,7 +51,7 @@ class _PaymentPageState extends State<PaymentPage> {
       );
     } finally {
       setState(() {
-        isFetchingData = false; // Selesai pemuatan data
+        isFetchingData = false;
       });
     }
   }
@@ -73,7 +70,6 @@ class _PaymentPageState extends State<PaymentPage> {
       final response = await request.post(
         'http://localhost:8000/pembayaran/pembayaran/process/',
         {'payment_method': selectedPaymentMethod},
-
       );
 
       if (response['message'] == 'Payment successful!') {
@@ -127,153 +123,70 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   String formatCurrency(double value) {
-  final formatter = NumberFormat("#,##0", "id_ID");
-  return formatter.format(value);
+    final formatter = NumberFormat("#,##0", "id_ID");
+    return formatter.format(value);
   }
 
   @override
   Widget build(BuildContext context) {
-    final request = context.watch<CookieRequest>();
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pembayaran', style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
-      ),
-      body: _buildBody(),
-    );
-  }
-
-  Widget _buildBody() {
-    if (isFetchingData) {
-      // Data masih dimuat
-      return const Center(child: CircularProgressIndicator());
-    } else if (keranjangItems.isEmpty) {
-      // Keranjang kosong
-      return _buildEmptyCart();
-    } else if (city == null) {
-      // Data pengiriman kosong
-      return _buildEmptyShipping();
-    } else {
-      // Tampilkan keranjang
-      return SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 16),
-            _buildCartTable(),
-            const SizedBox(height: 16),
-            _buildTotalHargaSection(),
-            const SizedBox(height: 16),
-            _buildPaymentMethods(),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: isLoading ? null : () => processPayment(context.read<CookieRequest>()),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.lightBlue,
-                minimumSize: const Size(300, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text(
-                      'Bayar',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+      body: isFetchingData
+          ? const Center(child: CircularProgressIndicator())
+          : keranjangItems.isEmpty
+              ? _buildEmptyCart()
+              : city == null
+                  ? _buildEmptyShipping()
+                  : SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: CheckoutProgress(currentStep: 2),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildCartTable(),
+                          const SizedBox(height: 16),
+                          _buildTotalHargaSection(),
+                          const SizedBox(height: 16),
+                          _buildPaymentMethods(),
+                          Center(
+                            child: CustomButton(
+                              text: 'Bayar',
+                              isLoading: isLoading,
+                              onPressed: isLoading
+                                  ? () {}
+                                  : () => processPayment(context.read<CookieRequest>()),
+                              backgroundColor: Theme.of(context).primaryColor,
+                              textStyle: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              width: 250, 
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
                     ),
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      );
-    }
+    );
   }
 
   Widget _buildEmptyCart() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.shopping_cart_outlined,
-            size: 100,
-            color: Colors.grey,
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Keranjang Kosong',
-            style: TextStyle(fontSize: 24, color: Colors.grey),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const HomePage(), // Navigasi ke halaman utama
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.lightBlue,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text(
-              'Tambahkan Produk',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
+    return const EmptyCartWidget(
+      message: 'Keranjang belanja Anda kosong',
+
     );
+
   }
 
 
-    Widget _buildEmptyShipping() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.location_off,
-            size: 100,
-            color: Colors.grey,
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Data Pengiriman Tidak Tersedia',
-            style: TextStyle(fontSize: 24, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ShippingPage(), // Halaman pengiriman langsung
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.lightBlue,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text(
-              'Lengkapi Data Pengiriman',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
+  Widget _buildEmptyShipping() {
+    return const EmptyShipping(
+      message: "Data Pengiriman Tidak Tersedia"
+      );
   }
-
 
   Widget _buildCartTable() {
     return Padding(
@@ -329,7 +242,6 @@ class _PaymentPageState extends State<PaymentPage> {
       ],
     );
   }
-
 
   Widget _buildCell(String text) {
     return Padding(

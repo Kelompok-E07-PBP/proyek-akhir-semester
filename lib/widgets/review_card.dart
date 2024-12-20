@@ -9,11 +9,11 @@ class ReviewItem extends StatelessWidget {
   final Function(UlasanEntry) onEditReview;
 
   const ReviewItem({
-    Key? key,
+    super.key,
     required this.review,
     required this.onRemoveReview,
     required this.onEditReview, required String formattedDate, required CookieRequest request,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

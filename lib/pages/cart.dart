@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mujur_reborn/widgets/button.dart';
+import 'package:mujur_reborn/widgets/empty_cart.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:mujur_reborn/models/cart_model.dart';
 import 'package:mujur_reborn/pages/cart_form.dart';
-import 'package:mujur_reborn/providers/navigation_provider.dart'; // Import the provider
+import 'package:mujur_reborn/providers/navigation_provider.dart';
+import 'package:mujur_reborn/widgets/checkout_progress.dart'; // Import the progress widget
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -19,25 +22,22 @@ class _CartPageState extends State<CartPage> {
     return Cart.fromJson(response);
   }
 
-  Future<void> updateQuantity(
-      CookieRequest request, String itemId, int quantity) async {
+  Future<void> updateQuantity(CookieRequest request, String itemId, int quantity) async {
     try {
       final url = 'http://localhost:8000/keranjang/update-keranjang-ajax/$itemId/';
       final response = await request.post(url, {
         'quantity': quantity.toString(),
       });
-      debugPrint('Update Quantity Response: $response'); // Debugging
+      debugPrint('Update Quantity Response: $response');
       if (response['success'] == true) {
-        setState(() {}); // Refresh the page
+        setState(() {});
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  response['message'] ?? 'Gagal memperbarui jumlah')),
+          SnackBar(content: Text(response['message'] ?? 'Gagal memperbarui jumlah')),
         );
       }
     } catch (e) {
-      print('Update Quantity Error: $e'); // Debugging
+      print('Update Quantity Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Gagal memperbarui jumlah')),
       );
@@ -48,18 +48,16 @@ class _CartPageState extends State<CartPage> {
     try {
       final url = 'http://localhost:8000/keranjang/hapus-dari-keranjang-ajax/$itemId/';
       final response = await request.post(url, {});
-      print('Remove Item Response: $response'); // Debugging
+      print('Remove Item Response: $response');
       if (response['success'] == true) {
         setState(() {});
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  response['message'] ?? 'Gagal menghapus item')),
+          SnackBar(content: Text(response['message'] ?? 'Gagal menghapus item')),
         );
       }
     } catch (e) {
-      print('Remove Item Error: $e'); // Debugging
+      print('Remove Item Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Gagal menghapus item')),
       );
@@ -71,14 +69,6 @@ class _CartPageState extends State<CartPage> {
     final request = context.watch<CookieRequest>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Keranjang Belanja',
-        style: TextStyle(color: Colors.white, fontFamily: 'Montserrat', fontWeight: FontWeight.bold, fontSize: 20)
-        ), 
-        centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        elevation: 2,
-      ),
       body: FutureBuilder<Cart>(
         future: fetchCart(request),
         builder: (context, AsyncSnapshot<Cart> snapshot) {
@@ -94,53 +84,27 @@ class _CartPageState extends State<CartPage> {
             return _buildEmptyCart();
           }
 
-          return _buildCartContent(snapshot.data!, request);
+          return Column(
+            children: [
+              // Add the checkout progress
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: CheckoutProgress(currentStep: 0),
+              ),
+              Expanded(child: _buildCartContent(snapshot.data!, request)),
+            ],
+          );
         },
       ),
     );
   }
 
   Widget _buildEmptyCart() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.shopping_cart_outlined, size: 100, color: Colors.grey),
-            const SizedBox(height: 24),
-            const Text(
-              'Keranjang belanja Anda kosong',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                // Navigate to main (BottomNavbar)
-                Navigator.pushReplacementNamed(context, '/main');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF03D9FF),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              icon: const Icon(Icons.shopping_bag, color: Colors.white),
-              label: const Text(
-                'Lanjut Belanja',
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return const EmptyCartWidget(
+      message: 'Keranjang belanja Anda kosong',
+
     );
+
   }
 
   Widget _buildCartContent(Cart cart, CookieRequest request) {
@@ -203,33 +167,25 @@ class _CartPageState extends State<CartPage> {
                     ),
                     Text(
                       currencyFormatter.format(cart.total),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF03D9FF),
+                        color: Theme.of(context).primaryColor,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Provider.of<NavigationProvider>(context, listen: false).setIndex(2);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF03D9FF),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 5,
-                    ),
-                    child: const Text(
-                      'Beli Sekarang!',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Montserrat'),
-                    ),
+                CustomButton(
+                  text: 'Beli Sekarang!',
+                  onPressed: () {
+                    Provider.of<NavigationProvider>(context, listen: false).setIndex(2);
+                  },
+                  backgroundColor: Theme.of(context).primaryColor,
+                  textStyle: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],

@@ -31,12 +31,27 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Mujur Reborn',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.lightBlue,
-        ).copyWith(secondary: Colors.lightBlue[400]),
-        useMaterial3: true,
+    theme: ThemeData(
+      colorScheme: ColorScheme.fromSwatch(
+        primarySwatch: Colors.blue,
+      ).copyWith(secondary: Colors.blue[800]),
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(color: Colors.grey[400]!), // Default border color
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(color: Colors.grey[400]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(color: Colors.blue[800]!), // Focused border color
+        ),
       ),
+      useMaterial3: true,
+    ),
+
       // Define the initial route
       initialRoute: '/',
       // Define the named routes

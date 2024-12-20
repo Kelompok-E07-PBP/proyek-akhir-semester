@@ -10,12 +10,12 @@ class CartItemForm extends StatelessWidget {
   final Function(String) onRemoveItem;
 
   const CartItemForm({
-    Key? key,
+    super.key,
     required this.item,
     required this.request,
     required this.onUpdateQuantity,
     required this.onRemoveItem,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +83,7 @@ class CartItemForm extends StatelessWidget {
                             onUpdateQuantity(item.id, item.quantity - 1);
                           }
                         },
-                        icon: const Icon(Icons.remove_circle_outline, color: Color(0xFF03D9FF)),
+                        icon:  Icon(Icons.remove_circle_outline, color: Theme.of(context).primaryColor),
                       ),
                       Text(
                         item.quantity.toString(),
@@ -93,7 +93,7 @@ class CartItemForm extends StatelessWidget {
                         onPressed: () {
                           onUpdateQuantity(item.id, item.quantity + 1);
                         },
-                        icon: const Icon(Icons.add_circle_outline, color: Color(0xFF03D9FF)),
+                        icon:  Icon(Icons.add_circle_outline, color: Theme.of(context).primaryColor),
                       ),
                       const Spacer(),
                       IconButton(
