@@ -30,6 +30,19 @@ class Product {
         "pk": pk,
         "fields": fields.toJson(),
     };
+
+    // Method copyWith untuk Product untuk salin data dari produk.
+    Product copyWith({
+      String? model,
+      String? pk,
+      Fields? fields,
+    }) {
+      return Product(
+        model: model ?? this.model,
+        pk: pk ?? this.pk,
+        fields: fields ?? this.fields,
+      );
+    }
 }
 
 class Fields {
@@ -58,4 +71,19 @@ class Fields {
         "harga": harga,
         "gambar_produk": gambarProduk,
     };
+
+    // Method copyWith pada fields untuk salin atribut pada fields.
+    Fields copyWith({
+      String? namaProduk,
+      String? kategori,
+      String? harga,
+      String? gambarProduk,
+    }) {
+      return Fields(
+        namaProduk: namaProduk ?? this.namaProduk,
+        kategori: kategori ?? this.kategori,
+        harga: harga ?? this.harga,
+        gambarProduk: gambarProduk ?? this.gambarProduk,
+      );
+    }
 }
