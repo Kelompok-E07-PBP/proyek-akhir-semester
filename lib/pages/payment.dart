@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:mujur_reborn/pages/home.dart';
+import 'package:mujur_reborn/pages/shipping.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
 
@@ -30,17 +33,24 @@ class _PaymentPageState extends State<PaymentPage> {
       isFetchingData = true; // Mulai pemuatan data
     });
     try {
-      final response = await request.get('http://localhost:8000/keranjang/json/');
+      // Ambil data keranjang dan pengiriman
+      final response = await request.get('http://localhost:8000/pembayaran/keranjang-pengiriman/json');
+
       setState(() {
-        keranjangItems = response['items'] ?? [];
+        // Data keranjang
+        keranjangItems = response['keranjang']['items'] ?? [];
+        
+        // Data pengiriman
         city = response['pengiriman']?['city'];
-        deliveryFee = response['delivery_fee'] ?? 0.0;
-        totalHarga = response['total'] ?? 0.0;
+        deliveryFee = response['pengiriman']?['delivery_fee'] ?? 0.0;
+
+        // Total harga
+        totalHarga = response['total_harga'] ?? 0.0;
       });
     } catch (e) {
       print('Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal memuat data keranjang')),
+        const SnackBar(content: Text('Gagal memuat data keranjang dan pengiriman')),
       );
     } finally {
       setState(() {
@@ -116,6 +126,11 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 
+  String formatCurrency(double value) {
+  final formatter = NumberFormat("#,##0", "id_ID");
+  return formatter.format(value);
+  }
+
   @override
   Widget build(BuildContext context) {
     final request = context.watch<CookieRequest>();
@@ -136,6 +151,9 @@ class _PaymentPageState extends State<PaymentPage> {
     } else if (keranjangItems.isEmpty) {
       // Keranjang kosong
       return _buildEmptyCart();
+    } else if (city == null) {
+      // Data pengiriman kosong
+      return _buildEmptyShipping();
     } else {
       // Tampilkan keranjang
       return SingleChildScrollView(
@@ -176,21 +194,86 @@ class _PaymentPageState extends State<PaymentPage> {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(
+        children: [
+          const Icon(
             Icons.shopping_cart_outlined,
             size: 100,
             color: Colors.grey,
           ),
-          SizedBox(height: 20),
-          Text(
+          const SizedBox(height: 20),
+          const Text(
             'Keranjang Kosong',
             style: TextStyle(fontSize: 24, color: Colors.grey),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const HomePage(), // Navigasi ke halaman utama
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.lightBlue,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Tambahkan Produk',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
     );
   }
+
+
+    Widget _buildEmptyShipping() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.location_off,
+            size: 100,
+            color: Colors.grey,
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Data Pengiriman Tidak Tersedia',
+            style: TextStyle(fontSize: 24, color: Colors.grey),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const ShippingPage(), // Halaman pengiriman langsung
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.lightBlue,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Lengkapi Data Pengiriman',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Widget _buildCartTable() {
     return Padding(
@@ -240,12 +323,13 @@ class _PaymentPageState extends State<PaymentPage> {
     return TableRow(
       children: [
         _buildCell(item['product_name']),
-        _buildCell('Rp ${item['price']}'),
+        _buildCell('Rp ${formatCurrency(item['price'])}'),
         _buildCell('${item['quantity']}'),
-        _buildCell('Rp ${item['subtotal']}'),
+        _buildCell('Rp ${formatCurrency(item['subtotal'])}'),
       ],
     );
   }
+
 
   Widget _buildCell(String text) {
     return Padding(
@@ -265,9 +349,9 @@ class _PaymentPageState extends State<PaymentPage> {
       child: Column(
         children: [
           _buildPriceRow('Delivery City', city ?? '-'),
-          _buildPriceRow('Delivery Fee', 'Rp $deliveryFee'),
+          _buildPriceRow('Delivery Fee', 'Rp ${formatCurrency(deliveryFee)}'),
           const Divider(color: Colors.grey),
-          _buildPriceRow('Total Harga', 'Rp $totalHarga', isBold: true),
+          _buildPriceRow('Total Harga', 'Rp ${formatCurrency(totalHarga)}', isBold: true),
         ],
       ),
     );
