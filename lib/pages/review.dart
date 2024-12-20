@@ -18,13 +18,12 @@ class _ReviewPageState extends State<ReviewPage> {
   @override
   void initState() {
     super.initState();
-    initializeDateFormatting('id_ID', null); // Inisialisasi locale Indonesia
+    initializeDateFormatting('id_ID', null); 
   }
 
   Future<List<UlasanEntry>> fetchReviews(CookieRequest request) async {
     try {
-      final response = await request.get('http://localhost:8000/ulasan/json/'); // Gunakan IP emulator
-      print('Response from API: $response');
+      final response = await request.get('http://localhost:8000/ulasan/json/'); 
       return (response as List<dynamic>)
           .map((data) => UlasanEntry.fromJson(data))
           .toList();
@@ -134,7 +133,7 @@ class _ReviewPageState extends State<ReviewPage> {
   }
 
   Widget _buildReviewContent(List<UlasanEntry> reviews, CookieRequest request) {
-    final dateFormatter = DateFormat.yMMMMd('id_ID'); // Format tanggal lokal
+    final dateFormatter = DateFormat.yMMMMd('id_ID'); 
     return ListView.builder(
       itemCount: reviews.length,
       itemBuilder: (context, index) {
@@ -143,7 +142,7 @@ class _ReviewPageState extends State<ReviewPage> {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: ReviewItem(
             review: review,
-            formattedDate: dateFormatter.format(review.waktu), // Format tanggal
+            formattedDate: dateFormatter.format(review.waktu), 
             request: request,
             onRemoveReview: (id) => removeReview(request, id),
             onEditReview: (review) async {

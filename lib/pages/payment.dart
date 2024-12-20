@@ -5,7 +5,9 @@ import 'package:mujur_reborn/widgets/empty_cart.dart';
 import 'package:mujur_reborn/widgets/empty_shipping.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:mujur_reborn/widgets/checkout_progress.dart'; // Add this
+import 'package:mujur_reborn/widgets/checkout_progress.dart';
+import 'package:mujur_reborn/pages/payment_form.dart';
+
 
 class PaymentPage extends StatefulWidget {
   const PaymentPage({super.key});
@@ -35,7 +37,6 @@ class _PaymentPageState extends State<PaymentPage> {
       isFetchingData = true;
     });
     try {
-      // Ambil data keranjang dan pengiriman
       final response = await request.get('http://localhost:8000/pembayaran/keranjang-pengiriman/json');
 
       setState(() {
@@ -148,8 +149,14 @@ class _PaymentPageState extends State<PaymentPage> {
                           _buildCartTable(),
                           const SizedBox(height: 16),
                           _buildTotalHargaSection(),
-                          const SizedBox(height: 16),
-                          _buildPaymentMethods(),
+                          const SizedBox(height: 24),
+                          PaymentMethodForm(
+                            selectedPaymentMethod: selectedPaymentMethod,
+                            onChanged: (value) => setState(() {
+                              selectedPaymentMethod = value;
+                            }),
+                          ),
+                          const SizedBox(height: 32),
                           Center(
                             child: CustomButton(
                               text: 'Bayar',
@@ -163,7 +170,7 @@ class _PaymentPageState extends State<PaymentPage> {
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
-                              width: 250, 
+                              width: 280, 
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -176,11 +183,9 @@ class _PaymentPageState extends State<PaymentPage> {
   Widget _buildEmptyCart() {
     return const EmptyCartWidget(
       message: 'Keranjang belanja Anda kosong',
-
     );
 
   }
-
 
   Widget _buildEmptyShipping() {
     return const EmptyShipping(
@@ -282,32 +287,6 @@ class _PaymentPageState extends State<PaymentPage> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildPaymentMethods() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _buildRadioOption('Kartu Kredit'),
-        _buildRadioOption('Kartu Debit'),
-        _buildRadioOption('Transfer Bank'),
-        _buildRadioOption('E-Wallet'),
-      ],
-    );
-  }
-
-  Widget _buildRadioOption(String method) {
-    return Center(
-      child: SizedBox(
-        width: 300,
-        child: RadioListTile(
-          title: Center(child: Text(method)),
-          value: method,
-          groupValue: selectedPaymentMethod,
-          onChanged: (value) => setState(() => selectedPaymentMethod = value),
-        ),
-      ),
     );
   }
 }
