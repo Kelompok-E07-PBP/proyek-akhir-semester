@@ -75,9 +75,9 @@ class _HomePageState extends State<HomePage> {
         children: [
           const SlidingBanner(
             images: [
-              'assets/images/banner1.png',
-              'assets/images/banner2.png',
-              'assets/images/banner3.png',
+              'assets/images/tie1.webp',
+              'assets/images/tie4.webp',
+              'assets/images/tie5.webp',
             ],
           ),
 
