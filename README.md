@@ -9,7 +9,10 @@
 - 2306206446 - Valentino Vieri Zhuo
 <hr>
 
-## Tautan Aplikasi: 
+[![Build status](https://build.appcenter.ms/v0.1/apps/6cc07b04-fe20-418e-bd34-0af803354539/branches/main/badge)](https://appcenter.ms)
+
+## Tautan Aplikasi: https://install.appcenter.ms/orgs/kelompoke07pbp/apps/mujur-reborn/distribution_groups/public/releases/1
+
 ## Aplikasi:
 Mujur Reborn
 
