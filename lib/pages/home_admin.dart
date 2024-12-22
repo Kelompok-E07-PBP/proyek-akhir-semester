@@ -22,7 +22,7 @@ class _HomeAdminPageState extends State<HomeAdminPage>{
   //Fungsi untuk mengatur logika fetch product dari Django
   Future<List<Product>> fetchProduct(CookieRequest request) async {
     // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
-    final response = await request.get('http://localhost:8000/json/');
+    final response = await request.get('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/edit/json/');
     
     // Melakukan decode response menjadi bentuk json
     var data = response;
@@ -51,7 +51,7 @@ class _HomeAdminPageState extends State<HomeAdminPage>{
 
     // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
     final response = await http.put(
-      Uri.parse('http://localhost:8000/edit/update-from-flutter/${updatedProduct.pk}'),
+      Uri.parse('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/edit/update-from-flutter/${updatedProduct.pk}'),
       body: jsonEncode(updatedProduct.toJson()),
       headers: {'Content-Type': 'application/json'},
     );
@@ -79,7 +79,7 @@ class _HomeAdminPageState extends State<HomeAdminPage>{
 
   //Fungsi untuk mengatur logika delete product dari Flutter ke Django.
   Future<void> deleteProduct(String id, BuildContext context) async {
-    final url = Uri.parse('http://localhost:8000/edit/delete-from-flutter/$id');
+    final url = Uri.parse('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/edit/delete-from-flutter/$id');
     
     try {
       final response = await http.delete(url);

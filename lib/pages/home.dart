@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<List<Product>> fetchProduct(CookieRequest request) async {
-    final response = await request.get('http://localhost:8000/json/');
+    final response = await request.get('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/json/');
     var data = response;
 
     List<Product> listProduct = [];
@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> addToCart(CookieRequest request, Product product, int quantity) async {
-    final url = 'http://localhost:8000/keranjang/tambah-ke-keranjang-ajax/${product.pk}/';
+    final url = 'https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/keranjang/tambah-ke-keranjang-ajax/${product.pk}/';
     final response = await request.post(url, {
       'quantity': quantity.toString(),
     });

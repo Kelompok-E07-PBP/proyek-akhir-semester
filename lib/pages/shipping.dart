@@ -28,7 +28,7 @@ class _ShippingPageState extends State<ShippingPage> {
     setState(() => isLoading = true);
 
     try {
-      final response = await request.get('http://localhost:8000/keranjang/json/');
+      final response = await request.get('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/keranjang/json/');
       setState(() {
         cartItems = response['items'] ?? [];
       });
@@ -50,7 +50,7 @@ class _ShippingPageState extends State<ShippingPage> {
 
     try {
       final response = await request.post(
-        'http://localhost:8000/pengiriman/process_pengiriman_ajax/',
+        'https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/pengiriman/process_pengiriman_ajax/',
         formData,
       );
 

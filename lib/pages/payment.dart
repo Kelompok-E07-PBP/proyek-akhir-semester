@@ -37,7 +37,7 @@ class _PaymentPageState extends State<PaymentPage> {
       isFetchingData = true;
     });
     try {
-      final response = await request.get('http://localhost:8000/pembayaran/keranjang-pengiriman/json');
+      final response = await request.get('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/pembayaran/keranjang-pengiriman/json');
 
       setState(() {
         keranjangItems = response['keranjang']['items'] ?? [];
@@ -69,7 +69,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
     try {
       final response = await request.post(
-        'http://localhost:8000/pembayaran/pembayaran/process/',
+        'https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/pembayaran/pembayaran/process/',
         {'payment_method': selectedPaymentMethod},
       );
 
