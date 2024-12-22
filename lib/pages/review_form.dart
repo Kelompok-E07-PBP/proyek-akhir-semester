@@ -106,6 +106,7 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
           ? Uri.parse('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/ulasan/edit-ulasan-ajax/${widget.reviewData!['id']}/').toString()
           : Uri.parse('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id:8000/ulasan/create-ulasan-entry-ajax/').toString();
 
+      // ignore: unused_local_variable
       final response = await CookieRequest().post(url, reviewData);
       Navigator.pop(context);
     } catch (e) {
