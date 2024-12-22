@@ -101,18 +101,26 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
         'rating': _rating.toString(),
       };
 
-    try {
-      final url = widget.isEditing
-          ? Uri.parse('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/ulasan/edit-ulasan-ajax/${widget.reviewData!['id']}/').toString()
-          : Uri.parse('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id:8000/ulasan/create-ulasan-entry-ajax/').toString();
+      try {
+        final url = widget.isEditing
+            ? Uri.parse('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/ulasan/edit-ulasan-ajax/${widget.reviewData!['id']}/').toString()
+            : Uri.parse('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/ulasan/create-ulasan-entry-ajax/').toString();
 
-      // ignore: unused_local_variable
-      final response = await CookieRequest().post(url, reviewData);
-      Navigator.pop(context);
-    } catch (e) {
-      print('Error: $e');
-    }
-
+        final response = await CookieRequest().post(url, reviewData);
+        if (response['success'] == true) {
+          Navigator.pop(context, true); 
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response['message'] ?? 'Gagal menyimpan ulasan')),
+          );
+        }
+      } catch (e) {
+        print('Error: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Terjadi kesalahan saat menyimpan ulasan')),
+        );
+      }
     }
   }
 }
+
