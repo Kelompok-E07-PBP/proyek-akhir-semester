@@ -103,8 +103,8 @@ class _ReviewFormPageState extends State<ReviewFormPage> {
 
     try {
       final url = widget.isEditing
-          ? Uri.parse('http://localhost:8000/ulasan/edit-ulasan-ajax/${widget.reviewData!['id']}/').toString()
-          : Uri.parse('http://localhost:8000/ulasan/create-ulasan-entry-ajax/').toString();
+          ? Uri.parse('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/ulasan/edit-ulasan-ajax/${widget.reviewData!['id']}/').toString()
+          : Uri.parse('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id:8000/ulasan/create-ulasan-entry-ajax/').toString();
 
       final response = await CookieRequest().post(url, reviewData);
       Navigator.pop(context);

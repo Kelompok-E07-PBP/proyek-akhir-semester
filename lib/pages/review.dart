@@ -23,7 +23,7 @@ class _ReviewPageState extends State<ReviewPage> {
 
   Future<List<UlasanEntry>> fetchReviews(CookieRequest request) async {
     try {
-      final response = await request.get('http://localhost:8000/ulasan/json/'); 
+      final response = await request.get('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/ulasan/json/'); 
       return (response as List<dynamic>)
           .map((data) => UlasanEntry.fromJson(data))
           .toList();
@@ -35,7 +35,7 @@ class _ReviewPageState extends State<ReviewPage> {
 
   Future<void> removeReview(CookieRequest request, String reviewId) async {
     try {
-      final url = 'http://localhost:8000/ulasan/delete-ulasan-ajax/$reviewId/';
+      final url = 'https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/ulasan/delete-ulasan-ajax/$reviewId/';
       final response = await request.post(url, {});
       if (response['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(

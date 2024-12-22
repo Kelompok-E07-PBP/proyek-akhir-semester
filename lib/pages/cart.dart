@@ -18,13 +18,13 @@ class CartPage extends StatefulWidget {
 
 class _CartPageState extends State<CartPage> {
   Future<Cart> fetchCart(CookieRequest request) async {
-    final response = await request.get('http://localhost:8000/keranjang/json/');
+    final response = await request.get('https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/keranjang/json/');
     return Cart.fromJson(response);
   }
 
   Future<void> updateQuantity(CookieRequest request, String itemId, int quantity) async {
     try {
-      final url = 'http://localhost:8000/keranjang/update-keranjang-ajax/$itemId/';
+      final url = 'https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/keranjang/update-keranjang-ajax/$itemId/';
       final response = await request.post(url, {
         'quantity': quantity.toString(),
       });
@@ -46,7 +46,7 @@ class _CartPageState extends State<CartPage> {
 
   Future<void> removeItem(CookieRequest request, String itemId) async {
     try {
-      final url = 'http://localhost:8000/keranjang/hapus-dari-keranjang-ajax/$itemId/';
+      final url = 'https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/keranjang/hapus-dari-keranjang-ajax/$itemId/';
       final response = await request.post(url, {});
       print('Remove Item Response: $response');
       if (response['success'] == true) {

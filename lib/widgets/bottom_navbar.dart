@@ -26,7 +26,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
   ];
 
   Future<void> _logout(CookieRequest request) async {
-    final response = await request.logout("http://localhost:8000/auth/logout/");
+    final response = await request.logout("https://valentino-vieri-mujurreborn.pbp.cs.ui.ac.id/auth/logout/");
     String message = response["message"];
     if (context.mounted) {
       if (response['status']) {
