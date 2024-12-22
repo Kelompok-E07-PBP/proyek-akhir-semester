@@ -34,23 +34,18 @@ class CartItemForm extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            // Placeholder for product image
             Container(
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Theme.of(context).primaryColor.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8),
-                image: item.productImage != null
-                    ? DecorationImage(
-                        image: NetworkImage(item.productImage!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
               ),
-              child: item.productImage == null
-                  ? const Icon(Icons.image, color: Colors.grey)
-                  : null,
+              child: Icon(
+                Icons.shopping_bag,  // Or any other icon you prefer
+                color: Theme.of(context).primaryColor,
+                size: 30,
+              ),
             ),
             const SizedBox(width: 16),
             // Product details
